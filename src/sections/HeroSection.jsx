@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import logoPng from "../assets/Logo BIMCode Solutions 4 Final.png";
 
 export default function HeroSection() {
@@ -11,10 +10,10 @@ export default function HeroSection() {
             Revit Automation for Engineers
           </p>
           <h1 className="text-4xl font-semibold leading-snug text-slate-900 dark:text-white md:text-5xl lg:text-[3.25rem]">
-            Revit automation for engineers who need certainty and speed.
+            Revit automation for engineering teams that need certainty and speed.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-slate-600 dark:text-slate-300">
-            Revit-native automation, Python-based tooling, and AI copilots that eliminate manual work—without breaking your standards.
+            Revit-native automation, pyRevit/Python tooling, and AI-assisted workflows that reduce manual work without compromising standards.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
@@ -23,12 +22,12 @@ export default function HeroSection() {
             >
               Talk to an engineer
             </a>
-            <Link
-              to="#pricing"
+            <a
+              href="/#services"
               className="btn-ghost px-6 py-3 text-sm font-semibold tracking-wide"
             >
-              View products
-            </Link>
+              See services
+            </a>
           </div>
           <dl className="mt-10 grid grid-cols-2 gap-6 text-sm text-slate-500 dark:text-slate-400 sm:grid-cols-4">
             <div>
@@ -53,7 +52,7 @@ export default function HeroSection() {
               <dt className="font-semibold text-slate-900 dark:text-white">
                 BIM-first
               </dt>
-              <dd>Deep Revit and computation expertise</dd>
+              <dd>Deep Revit and automation expertise</dd>
             </div>
           </dl>
         </div>

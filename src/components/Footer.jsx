@@ -24,36 +24,12 @@ export default function Footer() {
         </p>
         <div className="flex items-center justify-center gap-4">
           <a
-            href="https://www.youtube.com/@BIMCodeSolutions25"
+            href="https://www.linkedin.com/in/emin-avdovic-90210/"
             target="_blank"
             rel="noreferrer"
             className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
           >
-            YouTube
-          </a>
-          <a
-            href="https://www.instagram.com/bimcode_solutions_"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
-          >
-            Instagram
-          </a>
-          <a
-            href="https://x.com/bimcodesolution"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
-          >
-            X
-          </a>
-          <a
-            href="https://www.tiktok.com/@bimcodesolutions"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
-          >
-            TikTok
+            LinkedIn
           </a>
           <a
             href="mailto:bimcodesolutions@gmail.com"

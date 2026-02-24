@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const FORMSPREE_FORM_ID = "YOUR_FORM_ID";
+
 const initialForm = {
   intent: "business",
   fullName: "",
@@ -11,6 +13,7 @@ const initialForm = {
 export default function ContactSection() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const updateField = (key, value) => {
     setForm((prev) => ({
@@ -19,10 +22,73 @@ export default function ContactSection() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const validate = () => {
+    if (!form.fullName.trim()) {
+      return "Please enter your full name.";
+    }
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      return "Please enter a valid email address.";
+    }
+    if (!form.message.trim()) {
+      return "Please add a short message about your workflow.";
+    }
+    return null;
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setStatus("Thanks! We will respond within 2 business days.");
-    setForm(initialForm);
+    setStatus(null);
+
+    const validationError = validate();
+    if (validationError) {
+      setStatus({ type: "error", message: validationError });
+      return;
+    }
+
+    if (FORMSPREE_FORM_ID === "YOUR_FORM_ID") {
+      setStatus({
+        type: "error",
+        message: "Set FORMSPREE_FORM_ID in ContactSection before using live submissions.",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        intent: form.intent,
+        fullName: form.fullName,
+        email: form.email,
+        company: form.company,
+        message: form.message,
+      };
+
+      const response = await fetch(`https://formspree.io/f/${FORMSPREE_FORM_ID}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
+
+      setStatus({
+        type: "success",
+        message: "Thanks, message received. You will hear back within 48 hours.",
+      });
+      setForm(initialForm);
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: "Submission failed. Please try again or email bimcodesolutions@gmail.com.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -36,12 +102,11 @@ export default function ContactSection() {
             Contact
           </p>
           <h2 className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white md:text-4xl">
-            Tell us about your workflow—and where automation should help.
+            Tell us about your workflow and where automation should help.
           </h2>
           <p className="mt-4 text-base text-slate-600 dark:text-slate-300">
-            Whether you need a targeted Dynamo script, a full automation
-            roadmap, or you want to join our team of specialists, drop us a
-            note. We tailor every engagement around tangible metrics.
+            Whether you need a targeted pyRevit/Python automation, a scoped implementation sprint,
+            or team enablement support, every engagement is aligned to measurable delivery outcomes.
           </p>
           <div className="mt-8 grid gap-6 rounded-3xl border border-slate-200/60 bg-white/80 p-6 text-sm text-slate-600 shadow-lg dark:border-slate-800/60 dark:bg-[#2b3338]/90 dark:text-slate-300">
             <div>
@@ -60,7 +125,7 @@ export default function ContactSection() {
                 Preferred Channels
               </div>
               <p className="mt-2">
-                bimcodesolutions@gmail.com · Python/AI automation · Remote delivery
+                bimcodesolutions@gmail.com - Revit/Python automation - Remote delivery
               </p>
             </div>
           </div>
@@ -167,20 +232,27 @@ export default function ContactSection() {
                 rows="4"
                 value={form.message}
                 onChange={(event) => updateField("message", event.target.value)}
-                placeholder="Tell us about your current workflow, the stack you use today, and the outcomes you want to accelerate."
+                placeholder="Tell us about your current workflow, your standards, and the delivery outcome you want."
                 className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-brand-300 dark:focus:ring-brand-500/40"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="btn-primary mt-6 w-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em]"
+            disabled={submitting}
+            className="btn-primary mt-6 w-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Start a conversation
+            {submitting ? "Submitting..." : "Start a conversation"}
           </button>
           {status && (
-            <p className="mt-4 text-center text-sm text-brand-600 dark:text-brand-300">
-              {status}
+            <p
+              className={`mt-4 text-center text-sm ${
+                status.type === "success"
+                  ? "text-brand-600 dark:text-brand-300"
+                  : "text-red-600 dark:text-red-300"
+              }`}
+            >
+              {status.message}
             </p>
           )}
         </form>

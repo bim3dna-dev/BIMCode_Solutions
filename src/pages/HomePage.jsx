@@ -2,7 +2,8 @@ import HeroSection from "../sections/HeroSection.jsx";
 import ProductDemoSection from "../sections/ProductDemoSection.jsx";
 import BenefitsSection from "../sections/BenefitsSection.jsx";
 import ProductsSection from "../sections/ProductsSection.jsx";
-import CustomizationSection from "../sections/CustomizationSection.jsx";
+import ProcessSection from "../sections/ProcessSection.jsx";
+import OutcomesSection from "../sections/OutcomesSection.jsx";
 import AboutSection from "../sections/AboutSection.jsx";
 import ContactSection from "../sections/ContactSection.jsx";
 
@@ -14,7 +15,8 @@ export default function HomePage() {
       <ProductDemoSection />
       <BenefitsSection />
       <ProductsSection />
-      <CustomizationSection />
+      <ProcessSection />
+      <OutcomesSection />
       <AboutSection />
       <div className="section-divider" aria-hidden="true" />
       <ContactSection />

@@ -7,19 +7,25 @@ export default function ProductDemoSection() {
       <div className="section-container grid gap-10 lg:grid-cols-[1.2fr,0.8fr]">
         <div className="space-y-4">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-brand-500 dark:text-brand-300">
-            Product demo
+            Workflow demo
           </p>
           <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
             See how BIMCode accelerates Revit delivery.
           </h2>
           <p className="text-base text-slate-600 dark:text-slate-300">
-            A quick walkthrough of our automation pack: preflight checks, batch
-            sheet creation, compliant exports, and an AI copilot that speeds up
-            production while staying on your standards.
+            A quick walkthrough of a Revit automation package: preflight checks,
+            batch sheet creation, compliance exports, and AI-assisted guidance
+            to keep production aligned with your standards.
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
             <span className="rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-700">
-              Revit + Dynamo
+              pyRevit
+            </span>
+            <span className="rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-700">
+              Revit API
+            </span>
+            <span className="rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-700">
+              Python
             </span>
             <span className="rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-700">
               QA automation
