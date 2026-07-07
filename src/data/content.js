@@ -94,6 +94,36 @@ export const benefits = [
   },
 ];
 
+export const outcomes = [
+  {
+    title: "Less repetitive BIM production work",
+    challenge:
+      "BIM teams spend valuable production time on recurring tagging, checking, sheet preparation, exports, and model review routines.",
+    automation:
+      "Automate repeatable Revit tasks with standards-aware pyRevit, Python, Dynamo, or Revit API workflows.",
+    result:
+      "Teams can reduce manual production effort while keeping recurring documentation work easier to review and repeat.",
+  },
+  {
+    title: "More consistent project delivery",
+    challenge:
+      "Naming rules, parameters, sheet requirements, and BIM standards can drift when they depend only on manual discipline.",
+    automation:
+      "Turn office standards and project requirements into repeatable checks, reports, and guided production workflows.",
+    result:
+      "Project teams get a clearer path to consistent deliverables without relying on unsupported metrics or hidden scripts.",
+  },
+  {
+    title: "Better use of senior BIM expertise",
+    challenge:
+      "BIM managers and experienced modelers are often pulled into repetitive checking and coordination routines.",
+    automation:
+      "Move recurring review steps into documented tools that surface issues and support team decisions.",
+    result:
+      "Senior staff can spend more attention on standards, judgment, coordination, and process improvement.",
+  },
+];
+
 export const services = [
   {
     title: "Automation audits",
