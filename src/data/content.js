@@ -111,7 +111,7 @@ export const outcomes = [
     automation:
       "Turn office standards and project requirements into repeatable checks, reports, and guided production workflows.",
     result:
-      "Project teams get a clearer path to consistent deliverables without relying on unsupported metrics or hidden scripts.",
+      "Project teams get a clearer path to consistent deliverables through documented, repeatable workflows.",
   },
   {
     title: "Better use of senior BIM expertise",

@@ -149,7 +149,7 @@ export default function ContactSection() {
           onSubmit={handleSubmit}
           className="rounded-3xl border border-slate-200/60 bg-white/90 p-8 shadow-2xl shadow-brand-200/40 ring-1 ring-brand-100 transition dark:border-slate-800/60 dark:bg-[#2b3338]/90 dark:shadow-brand-500/20 dark:ring-brand-500/30"
         >
-          <fieldset className="grid grid-cols-3 gap-3 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-slate-50 p-2 text-sm font-semibold text-slate-600 shadow-inner dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 dark:text-slate-200">
+          <fieldset className="grid gap-3 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-slate-50 p-2 text-sm font-semibold text-slate-600 shadow-inner sm:grid-cols-3 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 dark:text-slate-200">
             {[
               ["audit", "Audit"],
               ["tool", "Custom Tool"],
@@ -222,6 +222,9 @@ export default function ContactSection() {
               <label htmlFor="message" className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                 Workflow to automate
               </label>
+              <p id="messageHelp" className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                Describe the Revit workflow, production bottleneck, or BIM standard you want to automate. Include the Revit version, team size, and current process if relevant.
+              </p>
               <textarea
                 required
                 id="message"
@@ -229,7 +232,7 @@ export default function ContactSection() {
                 value={form.message}
                 onChange={(event) => updateField("message", event.target.value)}
                 disabled={isSubmitting}
-                placeholder="Describe the Revit workflow, production bottleneck, or BIM standard you want to automate. Include the Revit version, team size, and current process if relevant."
+                aria-describedby="messageHelp"
                 className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-brand-300 dark:focus:ring-brand-500/40"
               />
             </div>

@@ -57,13 +57,13 @@ export default function HeroSection() {
             </div>
           </dl>
         </div>
-        <div className="flex w-full max-w-2xl flex-1 items-center justify-end pr-8 md:pr-16 lg:pr-24 xl:pr-32">
-          <div className="relative flex h-[26rem] w-[26rem] translate-x-6 items-center justify-center sm:h-[28rem] sm:w-[28rem] sm:translate-x-10 lg:translate-x-14 xl:translate-x-16">
+        <div className="flex w-full max-w-2xl flex-1 items-center justify-center md:justify-end md:pr-16 lg:pr-24 xl:pr-32">
+          <div className="relative flex h-72 w-72 items-center justify-center sm:h-[28rem] sm:w-[28rem] sm:translate-x-10 lg:translate-x-14 xl:translate-x-16">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-brand-500/18 via-indigo-400/14 to-slate-900/22 blur-[80px] dark:from-slate-800/28 dark:via-slate-700/22 dark:to-slate-900/38" />
             <img
               src={logoPng}
               alt="BIMCode Solutions logo"
-              className="relative h-80 w-80 object-contain drop-shadow-[0_22px_34px_rgba(0,0,0,0.35)] sm:h-96 sm:w-96"
+              className="relative h-64 w-64 object-contain drop-shadow-[0_22px_34px_rgba(0,0,0,0.35)] sm:h-96 sm:w-96"
             />
           </div>
         </div>
