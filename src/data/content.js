@@ -1,99 +1,158 @@
-export const servicePackages = [
+export const offers = [
   {
-    name: "Automation Audit",
-    timeline: "Fixed Scope",
+    name: "BIM Automation Audit",
+    price: "From €1,500",
     description:
-      "Review of your current Revit workflow, bottlenecks, and automation opportunities with a prioritized implementation plan.",
+      "For BIM Managers who need to identify where automation will save the most production time.",
     features: [
       "Workflow and standards review",
       "Automation opportunity map",
-      "Prioritized implementation plan",
+      "Estimated time-saving areas",
+      "Implementation roadmap",
     ],
+    cta: "Book Audit",
+    intent: "audit",
   },
   {
-    name: "Implementation Sprint",
-    timeline: "1-2 Weeks",
+    name: "Revit Automation Sprint",
+    price: "From €4,500",
     description:
-      "Scoped build for a specific Revit API/pyRevit automation, validated against your standards and handover requirements.",
+      "For teams that need a production-ready pyRevit, Python, Dynamo, or Revit API tool built around their standards.",
     features: [
-      "Scoped pyRevit/Python delivery",
-      "Validation against project standards",
-      "Production-ready handover package",
+      "Custom automation tool",
+      "Tested deployment package",
+      "Documentation and handover",
+      "Support period",
     ],
-    highlight: true,
+    cta: "Discuss Sprint",
+    intent: "tool",
   },
   {
-    name: "Team Enablement",
-    timeline: "Ongoing",
+    name: "BIM Automation Retainer",
+    price: "From €2,000 / month",
     description:
-      "Documentation, walkthrough, and training so your team can use and maintain delivered automation confidently.",
+      "For engineering teams that want continuous automation, QA tooling, and internal BIM process improvement.",
     features: [
-      "Technical documentation",
-      "Walkthrough and onboarding",
-      "Optional support and refinement",
+      "Monthly automation roadmap",
+      "Tool maintenance",
+      "Small workflow automations",
+      "Advisory calls",
     ],
+    cta: "Request Retainer",
+    intent: "retainer",
+  },
+];
+
+export const solutions = [
+  {
+    name: "Sheet Automation",
+    description:
+      "Automated view creation, sheet setup, naming checks, print/export routines, and deliverable preparation.",
+  },
+  {
+    name: "BIM QA & Model Health",
+    description:
+      "Parameter validation, standards checks, model review routines, and structured reports for BIM managers.",
+  },
+  {
+    name: "MEP Tagging Automation",
+    description:
+      "Pipe, duct, and annotation workflows that reduce repetitive tagging and improve documentation consistency.",
+  },
+  {
+    name: "Revit Export Automation",
+    description:
+      "Reliable PDF, DWG, IFC, and BIM 360 export workflows aligned with project standards.",
+  },
+  {
+    name: "AI Drawing Scanner",
+    description:
+      "Experimental computer vision workflows for detecting symbols, markups, and drawing patterns in engineering documentation.",
+  },
+  {
+    name: "Custom pyRevit Toolbars",
+    description:
+      "Internal Revit toolkits packaged around team standards, deployment needs, and production workflows.",
   },
 ];
 
 export const benefits = [
   {
-    title: "Built for engineering delivery",
+    title: "Standards before scripts",
     description:
-      "Revit-native automation with pyRevit and Python that aligns with templates, QA checks, and submission discipline.",
+      "Automation is mapped to your templates, parameters, naming rules, and delivery expectations before code is written.",
   },
   {
-    title: "Production reliability first",
+    title: "Production-team focus",
     description:
-      "Implementations are scoped, validated, and handed over with clear operational guidance for long-running use.",
+      "Tools are designed for BIM managers, MEP engineers, coordinators, and Revit teams working under real deadlines.",
   },
   {
-    title: "Founder-led execution",
+    title: "Maintainable handover",
     description:
-      "Direct delivery without handoffs, so scope and technical decisions stay consistent from discovery to rollout.",
+      "pyRevit, Python, Dynamo, and Revit API workflows are documented so internal teams can operate them with confidence.",
   },
 ];
 
-export const processSteps = [
+export const services = [
   {
-    title: "Discovery",
+    title: "Automation audits",
     description:
-      "Review your current workflow, pain points, standards, and technical constraints before implementation starts.",
+      "Review Revit workflows, standards, and production bottlenecks before choosing what to automate.",
+    intent: "audit",
   },
   {
-    title: "Sprint Delivery",
+    title: "Custom tool development",
     description:
-      "Build and validate a scoped automation in a fixed delivery window using Revit API, pyRevit, Python, and AI-assisted workflows where useful.",
+      "Build pyRevit, Python, Dynamo, and Revit API tools around your internal standards and delivery process.",
+    intent: "tool",
   },
   {
-    title: "Handover",
+    title: "Retainer support",
     description:
-      "Deliver documentation, team walkthrough, and optional support so adoption is straightforward and maintainable.",
+      "Maintain existing tools, ship small automations, and keep a practical roadmap for BIM process improvement.",
+    intent: "retainer",
   },
 ];
 
-export const outcomes = [
+export const blogPosts = [
   {
-    title: "Multi-discipline model QA",
-    challenge: "Late-stage issue discovery before submissions caused repeated rework.",
-    automation:
-      "Implemented scheduled Python-based QA checks with targeted exception reporting.",
-    result:
-      "Reduced rework cycles by 40% and improved model health consistency across weekly releases.",
+    title: "Why Revit automation fails when it ignores office standards",
+    tag: "Standards",
+    time: "6 min read",
+    hook: "Automation only holds up when it respects templates, parameters, naming rules, and real project constraints.",
+    slug: "revit-automation-office-standards",
+    link: "/blog/revit-automation-office-standards",
+    body: [
+      "The fastest script can still fail in production if it ignores office standards, template structure, and project-specific conventions.",
+      "Useful Revit automation starts with the way teams actually document, review, and issue work.",
+      "Standards-first tools are easier to trust, support, and improve over time.",
+    ],
   },
   {
-    title: "Sheet production bottleneck",
-    challenge: "Manual setup and naming consumed senior team time each milestone.",
-    automation:
-      "Built pyRevit automation for sheet setup, naming validation, and export packaging.",
-    result:
-      "Cut release preparation from days to hours with fewer publish errors.",
+    title: "What BIM teams should automate before chasing AI",
+    tag: "Automation",
+    time: "5 min read",
+    hook: "Sheet setup, exports, tagging, model checks, and QA reports often create more immediate value than experimental AI.",
+    slug: "what-bim-teams-should-automate-before-ai",
+    link: "/blog/what-bim-teams-should-automate-before-ai",
+    body: [
+      "Before investing in AI workflows, most BIM teams benefit from automating predictable production work.",
+      "Exports, tagging, sheet setup, parameter checks, and reporting are strong candidates because the rules are visible and repeatable.",
+      "AI becomes more useful when the underlying BIM process is already structured.",
+    ],
   },
   {
-    title: "Standards adoption gap",
-    challenge: "Automation tools existed, but usage was inconsistent across projects.",
-    automation:
-      "Delivered enablement sessions and runbooks tied directly to internal standards.",
-    result:
-      "Increased adoption and lowered support overhead through repeatable team workflows.",
+    title: "pyRevit as an internal automation layer for engineering teams",
+    tag: "pyRevit",
+    time: "7 min read",
+    hook: "A well-structured pyRevit toolbar can turn team standards into accessible production tools inside Revit.",
+    slug: "pyrevit-internal-automation-layer",
+    link: "/blog/pyrevit-internal-automation-layer",
+    body: [
+      "pyRevit is useful because it brings automation into the environment where production teams already work.",
+      "Internal toolbars can package QA checks, exports, tagging routines, and project utilities around office standards.",
+      "The best implementations include documentation, deployment discipline, and a feedback path from users.",
+    ],
   },
 ];

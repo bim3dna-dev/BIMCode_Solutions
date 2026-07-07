@@ -19,18 +19,24 @@ export default function Footer() {
             </div>
           </div>
         </a>
-        <p className="text-center md:text-left">
-          &copy; {new Date().getFullYear()} BIMCode Solutions. All rights reserved.
-        </p>
-        <div className="flex items-center justify-center gap-4">
-          <a
-            href="https://www.linkedin.com/in/emin-avdovic-90210/"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
-          >
-            LinkedIn
+        <nav className="flex flex-wrap items-center justify-center gap-4 text-center md:justify-start">
+          <a href="/#hero" className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]">
+            Home
           </a>
+          <a href="/solutions" className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]">
+            Solutions
+          </a>
+          <a href="/case-study" className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]">
+            Case Study
+          </a>
+          <a href="/#about" className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]">
+            About
+          </a>
+          <a href="/#contact" className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]">
+            Contact
+          </a>
+        </nav>
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <a
             href="mailto:bimcodesolutions@gmail.com"
             className="transition hover:text-[#4f6a7d] dark:hover:text-[#9bb6c9]"
@@ -38,6 +44,9 @@ export default function Footer() {
             bimcodesolutions@gmail.com
           </a>
         </div>
+        <p className="text-center md:text-left">
+          &copy; {new Date().getFullYear()} BIMCode Solutions. All rights reserved.
+        </p>
       </div>
     </footer>
   );

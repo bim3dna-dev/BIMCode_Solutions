@@ -1,6 +1,7 @@
 import HeroSection from "../sections/HeroSection.jsx";
 import ProductDemoSection from "../sections/ProductDemoSection.jsx";
 import BenefitsSection from "../sections/BenefitsSection.jsx";
+import ProcessSection from "../sections/ProcessSection.jsx";
 import ProductsSection from "../sections/ProductsSection.jsx";
 import ProcessSection from "../sections/ProcessSection.jsx";
 import OutcomesSection from "../sections/OutcomesSection.jsx";
@@ -14,6 +15,7 @@ export default function HomePage() {
       <div className="section-divider" aria-hidden="true" />
       <ProductDemoSection />
       <BenefitsSection />
+      <ProcessSection />
       <ProductsSection />
       <ProcessSection />
       <OutcomesSection />

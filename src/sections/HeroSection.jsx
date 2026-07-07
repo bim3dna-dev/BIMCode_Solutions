@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import logoPng from "../assets/Logo BIMCode Solutions 4 Final.png";
 
 export default function HeroSection() {
@@ -7,52 +8,52 @@ export default function HeroSection() {
       <div className="section-container relative flex flex-col-reverse items-center gap-12 py-20 lg:flex-row lg:gap-16 lg:py-28">
         <div className="flex-1">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.4em] text-brand-500 dark:text-brand-300">
-            Revit Automation for Engineers
+            Revit Automation for BIM Teams
           </p>
           <h1 className="text-4xl font-semibold leading-snug text-slate-900 dark:text-white md:text-5xl lg:text-[3.25rem]">
-            Revit automation for engineering teams that need certainty and speed.
+            Custom Revit automation for BIM teams losing hours to repetitive production work.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-slate-600 dark:text-slate-300">
-            Revit-native automation, pyRevit/Python tooling, and AI-assisted workflows that reduce manual work without compromising standards.
+            BIMCode Solutions builds pyRevit, Python, Dynamo, Revit API, and AI-assisted tools that help engineering teams automate documentation, QA, tagging, exports, model checks, and internal BIM workflows.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
-              href="#contact"
+              href="/?inquiry=audit#contact"
               className="btn-primary px-6 py-3 text-sm font-semibold tracking-wide"
             >
-              Talk to an engineer
+              Book an Automation Audit
             </a>
-            <a
-              href="/#services"
+            <Link
+              to="/solutions"
               className="btn-ghost px-6 py-3 text-sm font-semibold tracking-wide"
             >
-              See services
-            </a>
+              View Solutions
+            </Link>
           </div>
           <dl className="mt-10 grid grid-cols-2 gap-6 text-sm text-slate-500 dark:text-slate-400 sm:grid-cols-4">
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
-                150+ hours
+                Revit-native workflows
               </dt>
-              <dd>Manual drafting saved each month</dd>
+              <dd>Built inside production BIM environments</dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
-                12x ROI
+                BIM standards first
               </dt>
-              <dd>Average automation payback</dd>
+              <dd>Aligned with templates and delivery rules</dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
-                25 countries
+                Python, Dynamo, pyRevit, Revit API
               </dt>
-              <dd>Projects delivered across the globe</dd>
+              <dd>Practical tooling for repeatable work</dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white">
-                BIM-first
+                Built for MEP and production teams
               </dt>
-              <dd>Deep Revit and automation expertise</dd>
+              <dd>Focused on real documentation workflows</dd>
             </div>
           </dl>
         </div>
