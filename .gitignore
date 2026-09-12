@@ -1,4 +1,8 @@
 node_modules
+# Local environment configuration; retain the safe example.
+.env
+.env.*
+!.env.example
 # Python
 __pycache__/
 *.py[cod]
