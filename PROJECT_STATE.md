@@ -4,8 +4,9 @@
 
 - Last updated: 2026-09-12 (Europe/Sarajevo).
 - Current branch: `main`.
-- Latest relevant commit / M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774` — docs: establish project baseline and handoff state. Successfully pushed to `origin/main` on 2026-09-12.
-- Current milestone: M1 — AI Audit Product Surface. Complete locally and validated; ready for browser review, intentionally uncommitted and unpushed.
+- Latest relevant commit / M1 checkpoint: `fe2b496dd89fc0e12579e469debd961e1dd83430` — Milestone M1 complete... . Already existed at session start; `git push origin main` succeeded with `Everything up-to-date` on 2026-09-12. No duplicate commit or history rewrite.
+- M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
+- Current milestone: M1.1 — Production Proof + Distribution Metadata. Complete locally; placeholder retained and future integration documented. Public video content remains blocked as specified below. M1.1 is uncommitted and unpushed.
 - Next milestone: M2 — secure server-side OpenAI/Astra integration with schema-validated structured output. Not started; requires its own task.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -13,7 +14,7 @@
 
 The owner reports the website live at https://www.bimcodesolutions.com. The repository contains a static React/Vite website and Vercel SPA rewrite configuration. The deployed commit, live hosting account/settings, automatic deployment trigger, and production contact endpoint have not been independently verified. No production deployment or contact submission was performed during M0.
 
-The production baseline's BIM Automation Audit is a consultancy inquiry offering. Local M1 adds `/audit` with workflow intake and a local input summary; it has not been pushed or deployed. No server/API layer, model integration, generated analysis, report purchase, payment provider, or conversion analytics implementation exists. The authorized M0 documentation push succeeded; whether that push triggered hosting automation remains unverified. No deployment command or external form submission was performed.
+The consultancy BIM Automation Audit remains available through contact inquiries. M1 adds `/audit` with workflow intake and a local input summary and is committed on `origin/main`. Its live deployment status has not been verified. No server/API layer, model integration, generated analysis, report purchase, payment provider, or conversion analytics implementation exists. M0 and M1 pushes succeeded; whether Git pushes trigger hosting automation remains unverified. No deployment command or external form submission was performed. M1.1 preserves the existing homepage demo placeholder.
 
 ## Current Business Objective
 
@@ -45,7 +46,11 @@ Complete. Documentation/environment baseline committed separately as `4f279634a8
 
 ### M1 — AI Audit Product Surface
 
-Complete locally, validated, ready for browser review. `/audit` includes the product hero, staged three-step explanation, validated workflow intake, local structured preview, edit action, and manual-review link to the existing contact form. A single Audit entry is available in desktop/mobile navigation. No external service, database, authentication, payment, or social integration was introduced. See M1 validation and Git handoff below.
+Complete, committed as `fe2b496dd89fc0e12579e469debd961e1dd83430` and pushed to `origin/main`. `/audit` includes the product hero, staged three-step explanation, validated workflow intake, local structured preview, edit action, and manual-review link to the existing contact form. A single Audit entry is available in desktop/mobile navigation. No external service, database, authentication, payment, or social integration was introduced. See M1 validation and Git handoff below.
+
+### M1.1 — Production Proof + Distribution Metadata
+
+Complete locally as preparation/documentation work. Existing placeholder remains functional; no public YouTube watch/share URL was found in repository source, public assets, or documentation. The section is already isolated in `src/sections/ProductDemoSection.jsx`, so a speculative refactor is unnecessary. Video publication is a separate content dependency, not a completed integration. Future video requirements, social destinations, event pipeline, and platform-specific content policies are documented below. M2 is not started.
 
 ### M2 — AI Audit Engine
 
@@ -73,16 +78,33 @@ Current source supports website descriptions of QA, tagging, sheet/print/export 
 
 ### M7 — Distribution Engine
 
-Not started. Generate marketing drafts for meaningful events: `PRODUCT_LAUNCHED`, `MAJOR_FEATURE_SHIPPED`, `CASE_STUDY_PUBLISHED`, `CUSTOMER_RESULT`, `NEW_AUTOMATION_CAPABILITY`, `IMPORTANT_PRODUCT_LEARNING`.
+Not started. Publishable event examples: `PRODUCT_LAUNCHED`, `MAJOR_FEATURE_SHIPPED`, `CASE_STUDY_PUBLISHED`, `CUSTOMER_RESULT`, `NEW_AUTOMATION_CAPABILITY`, `WORKFLOW_DEMO_PUBLISHED`, `IMPORTANT_PRODUCT_LEARNING`.
 
-Initial flow: event → draft generated → human approval → publication. Never automatically publish arbitrary Git commits. Keep LinkedIn integration behind an abstraction independent of any specific social API implementation.
+Intended pipeline: meaningful product event → normalized content event → Astra generates platform-specific draft → human review/approval → platform adapter publishes. The normalized event should carry the factual source, event type, product/demo link, and supporting evidence so platform drafts share verified facts without copying identical text. Do not create posts for routine commits, formatting changes, dependency updates, internal refactors, or debugging noise.
+
+Potential adapters: `LinkedInPublisher`, `InstagramPublisher`, `XPublisher`, `XingPublisher`. These are future architecture names, not implemented classes. Keep publishing behind platform abstractions, including LinkedIn, rather than coupling the website to social APIs. Verify each platform's posting API availability, account eligibility, permissions, and destination identifiers during M7. No credentials or API integrations are added in M1.1.
 
 Owner-provided future publishing destinations (metadata only, no integration or publication performed):
 
 - LinkedIn: https://www.linkedin.com/in/emin-avdovic-90210/
 - Instagram: https://www.instagram.com/bimcode_solutions_/
+- X: https://x.com/bimcodesolution
+- XING: https://www.xing.com/discover/your-posts
 
-Generate platform-specific drafts for meaningful product events, then require human approval before publication.
+The supplied XING URL is a user-facing posts-management destination, not a verified public profile or API publishing target. Retain it as owner-provided metadata; resolve the actual authorized destination during M7 without scraping account pages.
+
+Adapt content for each platform; do not blindly copy the same text everywhere:
+
+| Platform | Future content policy |
+| --- | --- |
+| LinkedIn | Professional product/build updates: problem, solution, technical insight, verified measurable outcome where available, and product/demo link. |
+| XING | Professional/business-oriented version similar to LinkedIn, adapted to the platform and audience. |
+| X | Short engineering/product updates with a concise hook, one insight, and product/demo link. Avoid long threads by default. |
+| Instagram | Visual-first workflow screenshots, short clips, before/after visuals, concise captions, and product/demo links where supported. |
+
+Human approval remains mandatory before publication. Do not invent measurable outcomes or claim publishing permissions have been verified.
+
+YouTube is a proof/content source: selected public workflow videos can be referenced on the website and in social drafts. It is not currently an automated publishing destination; any YouTube posting or Data API work requires a separate later implementation. Intended path: production workflow video → website proof → social distribution → `/audit` → paid automation engagement.
 
 ### M8 — Analytics and Optimization
 
@@ -198,10 +220,46 @@ Validation on 2026-09-12:
 
 No M1 blocker found. Live production/contact delivery remains outside this validation. Local browser-check scripts/screenshots are temporary verification artifacts, not required runtime dependencies or canonical handoff files.
 
+## M1.1 Production Video Handoff
+
+`BLOCKED_CONTENT: production workflow video requires public YouTube watch/share URL`
+
+Required owner input is a selected public `https://www.youtube.com/watch?v=<VIDEO_ID>` or `https://youtu.be/<VIDEO_ID>` URL. These are format examples, not video links to embed. No public video URL is currently recorded in repository source, public assets, or docs. The reported YouTube Studio upload-management URL cannot be embedded; do not use it, scrape Studio, or invent an ID. The checked-in MP4 asset is not a supplied public YouTube URL and was not substituted for the requested content.
+
+Keep the current working placeholder until the URL arrives. `src/sections/ProductDemoSection.jsx` already contains the entire section, including its `aspect-video` frame and existing borders/cards, and is mounted by `HomePage.jsx`. No code refactor was needed to localize the future replacement. M1.1 does not change user-facing copy, introduce a dormant iframe, or imply that the demo is available.
+
+When the public URL is supplied and public playback/embedding is verified, make the replacement in `ProductDemoSection.jsx`:
+
+- Eyebrow: `WORKFLOW DEMO`.
+- Heading: `See a real Revit automation workflow in production.`
+- Supporting copy: briefly describe the actual video's Revit-native automation and the repetitive production steps it removes; verify the claim against the selected video, with no invented metrics.
+- Replace the placeholder with a responsive 16:9 YouTube iframe, keeping the existing card/border language and desktop/tablet/mobile behavior.
+- Use an accessible descriptive title, lazy loading, no autoplay, no background playback, and no extra video library. Prefer the privacy-enhanced `www.youtube-nocookie.com` embed domain after compatibility checks.
+- Add exactly one CTA below the video: `Analyze Your Workflow`, linking to `/audit`. Avoid adding duplicate CTAs around the demo.
+- Validate public playback, keyboard access, layout, and navigation before marking the content dependency resolved. Do not treat this as a YouTube Data API or automated posting integration.
+
+## M1.1 Validation and Scope
+
+Validation date: 2026-09-12. M1's existing commit was reviewed against its parent; the changes contain only the intended Audit source/tests, README/state updates, and generated output. No secrets or credentials were found. Tests and build passed before confirming the M1 push. The starting working tree was clean, so no duplicate M1 commit was created.
+
+Only `PROJECT_STATE.md` changed in M1.1. Application source, dependencies, environment variables, routes, homepage sections, and deployment configuration remain unchanged. Production builds reproduce the tracked artifacts without a content diff. No API integration, adapter class, credentials, social posts, payment, authentication, database, or M2 work was introduced.
+
+| Check | Result |
+| --- | --- |
+| Existing tests | `node --test src/features/audit/workflow.test.js`: 4 passed, 0 failed. |
+| Production build | `npm run build`: passed, 1,521 modules. Existing browser-data warnings remain. |
+| Diff validation | `git diff --check` passed; documentation-only diff inspected for scope and credentials. |
+| Local browser routes | Edge production preview: `/`, `/audit`, `/solutions`, `/case-study`, `/#about`, `/#contact` passed. `/about` and `/contact` preserve the existing not-found response; no new routes were added. |
+| Demo | Existing coming-soon heading and placeholder render; no iframe, broken embed, or video player was added. |
+| Responsive | Homepage/demo checks at 360, 768, and 1440px passed without horizontal overflow; screenshots captured. No uncaught page errors. |
+| Preview server | Existing local server on port 4173 used; an attempted second preview process correctly refused the occupied port. |
+
+Pre-existing lint configuration and other known issues above remain unchanged. Production deployment and a real YouTube video's playback are unverified; public video playback cannot be tested until the content URL is supplied. M1.1 preparation is ready for review, with this content dependency explicitly open.
+
 ## Current Git Handoff and Exact Next Action
 
-Branch: `main`. HEAD/M0 commit: `4f279634a871ba2cab7dcc282be750e45e645774`, pushed to `origin/main`. M1 has no commit: source/docs and regenerated `dist/` changes are unstaged; the new Audit page/model/tests and hashed build assets are untracked. M0 and M1 remain separate. No M1 push or deployment was performed.
+Branch: `main`. HEAD/M1 commit: `fe2b496dd89fc0e12579e469debd961e1dd83430`. `git push origin main` succeeded with `Everything up-to-date`; M1 is safely committed and pushed, separate from M0. M1.1 changes only `PROJECT_STATE.md`, unstaged and uncommitted. No M1.1 commit, push, or deployment was performed.
 
-Next action: browser-review `/audit` using `npm run preview` after a build, then commit/push M1 only when explicitly authorized. Transfer the reviewed M1 work through Git before switching machines.
+Exact next action: review the M1.1 documentation and provide the public YouTube watch/share URL to resolve `BLOCKED_CONTENT`; then replace the placeholder locally as specified above and validate the real video. Commit/push M1.1 only when explicitly authorized. The missing video URL does not prevent the separately authorized next major milestone, M2.
 
 For the next authorized M2 task: read repository instructions and state, reproduce tests/build and the known lint baseline, then verify the exact production OpenAI/Astra API model identifier and supported API interface. Select a secure server execution boundary compatible with the verified hosting setup, define request/response schemas using the normalized intake, add server input/output validation and production rate limiting, and keep credentials server-side. Objective: secure server-side OpenAI/Astra integration with schema-validated structured output. Do not infer the model identifier from the developer's display name, and do not introduce M5 payments.
