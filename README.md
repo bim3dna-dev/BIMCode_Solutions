@@ -10,7 +10,7 @@ React 18/Vite 7 single-page application using React Router 6, Tailwind CSS 3, Po
 
 ## Local development
 
-Prerequisites: Git, npm, and Node.js satisfying Vite's engine requirement (`^20.19.0 || >=22.12.0`). Install from the committed lockfile; do not copy `node_modules` between machines.
+Prerequisites: Git, npm, and Node.js 22.12+ (Node 24 validated for both Vite and the API). Install from the committed lockfile; do not copy `node_modules` between machines.
 
 ```sh
 npm ci
@@ -73,7 +73,7 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 
 Routes: `/`, `/solutions`, `/case-study`, `/blog`, `/blog/:slug`, `/audit`. `/products` redirects to `/solutions`. Contact is the homepage section at `/#contact`, not a `/contact` route. Unknown paths show the not-found page; unknown blog slugs redirect to `/blog`. Content comes from local JavaScript, with no CMS or remote content API.
 
-The Audit flow is intake → review → explicit Analyze Workflow → technical assessment or retryable error. Review stays local. Analysis posts the normalized intake to `/api/audit/analyze`, where identity fields are validated but excluded from the model request. Only qualitative workflow context reaches OpenAI; effort numbers are also excluded. Free text is not automatically anonymized, so visitors are told to remove sensitive information. No leads are silently submitted and no database is used. Draft/result state clears on navigation or refresh. The manual-review CTA still opens `/?inquiry=audit#contact` without transferring intake details. No ROI arithmetic or dynamic interview is implemented.
+The Audit flow is intake → review → explicit Analyze Workflow → technical assessment or retryable error. Review stays local. Analysis posts the normalized intake to `/api/audit/analyze`, where identity fields are validated but excluded from the model request. Workflow context includes frequency, occurrence count, duration/unit/basis, and participant count for qualitative assessment; identity and financial fields are excluded. Free text is not automatically anonymized, so visitors are told to remove sensitive information. No leads are silently submitted and no database is used. Draft/result state clears on navigation or refresh. The manual-review CTA still opens `/?inquiry=audit#contact` without transferring intake details. No ROI arithmetic or dynamic interview is implemented.
 
 ## Deployment
 

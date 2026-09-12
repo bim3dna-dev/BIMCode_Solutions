@@ -39,6 +39,8 @@ const response = (result = validResult()) => ({
     input_tokens: 120,
     output_tokens: 80,
     input_tokens_details: { cached_tokens: 20 },
+    output_tokens_details: { reasoning_tokens: 30 },
+    total_tokens: 200,
   },
 });
 function harness(implementation = async () => response(), customEnv = env) {
@@ -136,16 +138,25 @@ test("valid normalized payload accepted, strict types and unknown keys rejected"
     assert.equal(auditInputSchema.safeParse(input).success, false);
 });
 
-test("contact fields and arithmetic inputs are excluded from the model object", () => {
-  const modelData = toModelWorkflow(validInput());
+test("operational metrics survive while identity and financial fields are excluded", () => {
+  const input = validInput();
+  input.workflow.hourlyRate = 100;
+  input.workflow.budget = 5000;
+  const modelData = toModelWorkflow(input);
+  assert.deepEqual(modelData.frequency, input.workflow.frequency);
+  assert.deepEqual(modelData.manualEffort, input.workflow.manualEffort);
+  assert.equal(modelData.participants, input.workflow.participants);
+  assert.equal(auditInputSchema.safeParse(input).success, false);
   for (const value of Object.values(validInput().contact))
     assert.ok(!JSON.stringify(modelData).includes(value));
   assert.deepEqual(Object.keys(modelData).sort(), [
     "description",
     "desiredOutcome",
     "discipline",
-    "frequencyType",
+    "frequency",
+    "manualEffort",
     "painPoint",
+    "participants",
     "revitVersion",
     "software",
     "title",
@@ -191,6 +202,8 @@ test("HTTP boundary returns only validated assessment; safe usage is not returne
       inputTokens: 120,
       outputTokens: 80,
       cachedInputTokens: 20,
+      reasoningTokens: 30,
+      totalTokens: 200,
     },
   ]);
 });
@@ -358,6 +371,8 @@ test("usage missing values are safe and routing excludes API from SPA fallback",
     inputTokens: null,
     outputTokens: null,
     cachedInputTokens: null,
+    reasoningTokens: null,
+    totalTokens: null,
   });
   const config = JSON.parse(
     await readFile(new URL("../../vercel.json", import.meta.url), "utf8"),
@@ -369,4 +384,36 @@ test("usage missing values are safe and routing excludes API from SPA fallback",
     assert.ok(fallback.test(path));
   const endpoint = await import("../../api/audit/analyze.js");
   assert.equal(typeof endpoint.default.fetch, "function");
+});
+
+
+test("exact localhost, preview and production origins work without accepting other origins", async () => {
+  for (const origin of ["http://localhost:5173", "https://bimcode-preview.vercel.app", "https://www.bimcodesolutions.com"]) {
+    const { handler, calls } = harness(undefined, { ...env, AUDIT_ALLOWED_ORIGIN: origin });
+    assert.equal((await handler(request(undefined, { origin, "sec-fetch-site": "same-origin" }))).status, 200);
+    assert.equal((await handler(request(undefined, { origin: origin + ".evil.example" }))).status, 403);
+    assert.equal(calls.length, 1);
+  }
+});
+
+test("custom interval and minute units retain their operational meaning without derived totals", () => {
+  const input = validInput();
+  input.workflow.frequency = { type: "custom", occurrences: 2, intervalDays: 14 };
+  input.workflow.manualEffort = { duration: 90, unit: "minutes", basis: "per-person-per-occurrence" };
+  const model = toModelWorkflow(auditInputSchema.parse(input));
+  assert.deepEqual(model.frequency, input.workflow.frequency);
+  assert.deepEqual(model.manualEffort, input.workflow.manualEffort);
+  for (const field of ["annualHours", "laborCost", "savings", "roi", "payback"]) {
+    assert.equal(field in model, false);
+    assert.equal(auditResultSchema.safeParse({ ...validResult(), [field]: 100 }).success, false);
+  }
+});
+
+test("usage rejects invalid counts and never spreads provider or customer data", () => {
+  const usage = safeUsage({ secret: "private", usage: { input_tokens: -1, output_tokens: "80", total_tokens: Infinity, output_tokens_details: { reasoning_tokens: NaN } } });
+  assert.equal(usage.inputTokens, null);
+  assert.equal(usage.outputTokens, null);
+  assert.equal(usage.reasoningTokens, null);
+  assert.equal(usage.totalTokens, null);
+  assert.ok(!JSON.stringify(usage).includes("private"));
 });

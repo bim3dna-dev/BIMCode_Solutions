@@ -10,6 +10,7 @@
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
 - Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; credentials/model access, live testing, deployed routing verification, and production rate limiting remain activation requirements.
 - Latest committed checkpoint: `19c0e1e4af39af3369c896d687293d42931ab3fb` — feat: add production workflow demo (M1.2 closure), on main/origin/main.
+- Active next step: M2.1 ? Production Activation and Live Astra Validation; local preparation complete, manual live test pending. Production remains disabled.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -358,3 +359,16 @@ The M2 code is reviewable, but M2 must not be marked ready for production or adv
 Branch: `main`. M2 implementation closure uses the dedicated commit message `feat: add secure Astra audit backend`, following `19c0e1e4af39af3369c896d687293d42931ab3fb` (M1.2). Resolve the closure commit hash and remote synchronization from `git log -1` and `git status`; do not infer activation from a Git push. Only intended M2 source, tests, configuration, documentation, and generated assets are included. No credentials were introduced. `AUDIT_ANALYSIS_ENABLED=false` remains the default; the endpoint requires explicit enablement before provider calls. The standalone billable live test requires explicit invocation and was not run. No backend enablement or M3 work was performed.
 
 Exact next action: await a separately authorized production activation task. Implementation review is complete. That task must provision server configuration on a protected environment, verify model access with the explicit live test, and configure/test deployment-wide rate limiting and Vercel function routing. Only then enable analysis and evaluate real assessment quality before production approval. Do not paste credentials into chat or commit them. M3 remains **Dynamic diagnostic interview / follow-up questioning**, not started and not authorized by this task.
+
+
+## M2.1 ? Production Activation and Live Astra Validation
+
+Status: **READY FOR LIVE TEST**. M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`; M2 production activation: **PENDING**. This section supersedes historical M2 payload descriptions that excluded operational counts.
+
+Model allowlist now preserves frequency type/occurrences/custom interval, manual duration/unit/per-person basis, and participants alongside technical workflow text. Contact name/email/company/role and financial fields remain excluded. Instructions allow qualitative context only, prohibit annual/financial arithmetic, and retain deterministic Revit API first guidance. Usage logging adds reasoning and total tokens without public UI exposure. The explicit synthetic live test now exercises six-person weekly piping QA and prints schema/usage/timing plus synthetic output for manual review.
+
+No local OPENAI_API_KEY or .env.local was available. No live call, returned model, live schema/quality result, token measurement, Preview deployment, or external WAF configuration is claimed. Current rate-limit status: **RATE_LIMITING_NOT_YET_CONFIGURED**; no process-local limiter was added. Production enablement and M3 were not started.
+
+The operational runbook in docs/AUDIT_BACKEND.md contains exact existing variables, Preview-only steps, 3 POST requests per IP per 600-second WAF recommendation, coverage verification, timeout/error matrix, troubleshooting, and the explicit activation checklist. SDK timeout remains 45s, browser 55s, Vercel 60s; output cap remains 4,000 with low reasoning/verbosity.
+
+Validation: baseline 15 tests/build/routing passed. Final validation: all 18 offline tests pass; production build passes with existing dependency warnings; Vercel routing conversion/normalization and API exclusions pass; git diff --check passes; source/docs/generated-asset secret-pattern scan passes, no local env file is tracked, and .env.local is ignored. The live command rejects missing credentials before any call. Git: main tracks origin/main with six intended modified files and no new files. M2.1 edits remain uncommitted and unpushed on main for review. Exact next action: privately add OPENAI_API_KEY to ignored .env.local, leave AUDIT_ANALYSIS_ENABLED=false, then run `npm run test:live`. Review schema, architecture, usage, and latency before protected Preview testing. Production remains blocked until all activation gates and explicit authorization are satisfied.
