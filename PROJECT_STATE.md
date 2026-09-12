@@ -7,8 +7,8 @@
 - Latest relevant commit / M1 checkpoint: `fe2b496dd89fc0e12579e469debd961e1dd83430` — Milestone M1 complete... . Already existed at session start; `git push origin main` succeeded with `Everything up-to-date` on 2026-09-12. No duplicate commit or history rewrite.
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
-- Current milestone: M1.2 — Production Workflow Demo. Complete locally and ready for production review; uncommitted and unpushed. The public video URL dependency is resolved.
-- Next milestone: M2 — secure server-side OpenAI/Astra integration with schema-validated structured output. Not started; requires its own task.
+- Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
+- Active next milestone: M2 — secure server-side OpenAI/Astra integration with schema-validated structured output. Not started; requires its own task.
 - This file is the canonical handoff; do not rely on chat history.
 
 ## Production State
@@ -55,7 +55,7 @@ Complete locally as preparation/documentation work. Existing placeholder remains
 
 ### M1.2 — Production Workflow Demo
 
-Complete locally: the production workflow video is integrated with one `/audit` CTA. See validation and Git handoff below. M1.1 is now committed and pushed; its former missing-URL dependency is resolved.
+Complete and manually production-reviewed by the owner: the production workflow video is integrated with one `/audit` CTA. See validation and Git handoff below. M1.1 is now committed and pushed; its former missing-URL dependency is resolved.
 
 ### M2 — AI Audit Engine
 
@@ -263,7 +263,7 @@ Pre-existing lint configuration and other known issues above remain unchanged. P
 
 ## M1.2 — Production Workflow Demo
 
-Status: complete locally, ready for production review. M1.1 was reviewed as a documentation-only diff with no secrets, validated with tests/build/diff checks, committed as `22708f8ad3958b5fb9e5e7ede764a066ef494867`, and pushed successfully to `origin/main` before M1.2 changes began.
+Status: complete; manual production review passed, as confirmed by the owner on 2026-09-12. M1.1 was reviewed as a documentation-only diff with no secrets, validated with tests/build/diff checks, committed as `22708f8ad3958b5fb9e5e7ede764a066ef494867`, and pushed successfully to `origin/main` before M1.2 changes began.
 
 First production workflow proof asset (title and subject supplied by the owner):
 
@@ -287,12 +287,12 @@ Validation on 2026-09-12:
 - Edge browser: homepage and iframe render, correct privacy-enhanced URL/title/lazy/fullscreen attributes, exactly one demo CTA, CTA opens `/audit`, and `/solutions` and `/case-study` load.
 - About/contact remain homepage sections (`/#about`, `/#contact`). Direct `/about` and `/contact` retain existing not-found behavior; no routes were changed.
 - Frame ratio and no horizontal overflow verified at 360, 768, and 1440px; screenshots captured. No uncaught page errors.
-- Restricted browser access initially could not load the external player. Network-enabled verification returned HTTP 200 for the embed, loaded the YouTube HTML5 player, and observed its video paused at time 0. No autoplay occurred. Full manual playback, audio, and production-domain behavior remain release-review checks.
+- Restricted browser access initially could not load the external player. Network-enabled verification returned HTTP 200 for the embed, loaded the YouTube HTML5 player, and observed its video paused at time 0. No autoplay occurred. The owner subsequently confirmed that M1.2 passed manual production review.
 
 ## Current Git Handoff and Exact Next Action
 
-Branch: `main`. HEAD: `22708f8ad3958b5fb9e5e7ede764a066ef494867`, pushed to `origin/main`. M1.2 source/docs/generated output are unstaged, with new hashed build assets untracked. No M1.2 commit, push, deployment, or social publication was performed.
+Branch: `main`. M1.2 implementation was already committed as `4958435ee94592419561f6eb567a9cf687b71249` when closure began; its diff contains only the demo component, project state, and generated assets. The closure commit uses `feat: add production workflow demo` and records the completed review without rewriting history. Resolve its final hash and remote synchronization with `git log -1` and `git status`. Closure validation: all 4 existing tests passed, production build passed with existing browser-data warnings, and `git diff --check` passed. No new application changes, M2 implementation, or social publication were made during closure.
 
-Exact next action: review the homepage video, manually play it and check audio/fullscreen, and follow `Analyze Your Workflow` to `/audit`. Commit/push M1.2 only when explicitly authorized, then verify the production release and public player. The next major milestone remains **M2 — Secure Astra/OpenAI analysis backend**; do not begin it without its own task.
+Exact next action: await the separately authorized M2 task. M1.2 is complete and manual production review has passed. The active next milestone is **M2 — Secure Astra/OpenAI analysis backend**; no M2 work has started.
 
 For the next authorized M2 task: read repository instructions and state, reproduce tests/build and the known lint baseline, then verify the exact production OpenAI/Astra API model identifier and supported API interface. Select a secure server execution boundary compatible with the verified hosting setup, define request/response schemas using the normalized intake, add server input/output validation and production rate limiting, and keep credentials server-side. Objective: secure server-side OpenAI/Astra integration with schema-validated structured output. Do not infer the model identifier from the developer's display name, and do not introduce M5 payments.
