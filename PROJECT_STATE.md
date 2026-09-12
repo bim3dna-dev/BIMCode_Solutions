@@ -8,9 +8,9 @@
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
-- Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; credentials/model access, live testing, deployed routing verification, and production rate limiting remain activation requirements.
-- Latest committed checkpoint: `19c0e1e4af39af3369c896d687293d42931ab3fb` — feat: add production workflow demo (M1.2 closure), on main/origin/main.
-- Active next step: M2.1 ? Production Activation and Live Astra Validation; local preparation complete, manual live test pending. Production remains disabled.
+- Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; local live provider validation has passed; Preview, deployed routing verification, and distributed rate limiting remain activation requirements.
+- Prior committed checkpoint: `96871e1` (M2.1 local preparation). This local validation checkpoint follows it with `chore: prepare Astra audit production activation`; resolve its hash with `git log -1`.
+- Active next step: M2.1 ? Production Activation and Live Astra Validation; local live validation complete, Vercel Preview validation pending. Production remains disabled.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -18,7 +18,7 @@
 
 The owner reports the website live at https://www.bimcodesolutions.com. The repository contains a static React/Vite website and Vercel SPA rewrite configuration. The deployed commit, live hosting account/settings, automatic deployment trigger, and production contact endpoint have not been independently verified. No production deployment or contact submission was performed during M0.
 
-The consultancy BIM Automation Audit remains available through contact inquiries. M1 adds `/audit` with workflow intake and a local input summary and is committed on `origin/main`. Its live deployment status has not been verified. The committed production baseline has no analysis backend. Local M2 now adds a disabled-by-default server function and assessment UI; it has not been deployed or tested against a live model. No payment provider, report purchase, or conversion analytics implementation exists. M0 and M1 pushes succeeded; whether Git pushes trigger hosting automation remains unverified. No deployment command or external form submission was performed. M1.1 preserves the existing homepage demo placeholder.
+The consultancy BIM Automation Audit remains available through contact inquiries. M1 adds `/audit` with workflow intake and a local input summary and is committed on `origin/main`. Its live deployment status has not been verified. The committed M2 baseline includes a disabled-by-default server function and assessment UI. The owner has now passed local live provider validation; deployed behavior remains unverified. No payment provider, report purchase, or conversion analytics implementation exists. M0 and M1 pushes succeeded; whether Git pushes trigger hosting automation remains unverified. No deployment command or external form submission was performed. M1.1 preserves the existing homepage demo placeholder.
 
 ## Current Business Objective
 
@@ -62,7 +62,7 @@ Complete and manually production-reviewed by the owner: the production workflow 
 
 ### M2 — AI Audit Engine
 
-Implemented locally: POST `/api/audit/analyze`, official OpenAI Responses SDK, shared strict schemas, data minimization, safe errors, usage logging, and structured assessment UI. Current official documentation verifies `gpt-6-astra`, Responses, Structured Outputs, and low reasoning effort. Account access and live behavior remain unverified. Production blockers and validation are recorded in the M2 section below. M3 is not started.
+Implemented locally: POST `/api/audit/analyze`, official OpenAI Responses SDK, shared strict schemas, data minimization, safe errors, usage logging, and structured assessment UI. Current official documentation verifies `gpt-6-astra`, Responses, Structured Outputs, and low reasoning effort. Local account access, Structured Output, and architecture quality passed the owner-reported M2.1 live test; deployed behavior remains unverified. Production blockers and validation are recorded in the M2 section below. M3 is not started.
 
 ### M3 — Dynamic Diagnostic Interview
 
@@ -363,12 +363,20 @@ Exact next action: await a separately authorized production activation task. Imp
 
 ## M2.1 ? Production Activation and Live Astra Validation
 
-Status: **READY FOR LIVE TEST**. M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`; M2 production activation: **PENDING**. This section supersedes historical M2 payload descriptions that excluded operational counts.
+Status: **LOCAL VALIDATION COMPLETE**. M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`; M2 production activation: **PENDING**. This section supersedes historical M2 payload descriptions that excluded operational counts.
 
 Model allowlist now preserves frequency type/occurrences/custom interval, manual duration/unit/per-person basis, and participants alongside technical workflow text. Contact name/email/company/role and financial fields remain excluded. Instructions allow qualitative context only, prohibit annual/financial arithmetic, and retain deterministic Revit API first guidance. Usage logging adds reasoning and total tokens without public UI exposure. The explicit synthetic live test now exercises six-person weekly piping QA and prints schema/usage/timing plus synthetic output for manual review.
 
-No local OPENAI_API_KEY or .env.local was available. No live call, returned model, live schema/quality result, token measurement, Preview deployment, or external WAF configuration is claimed. Current rate-limit status: **RATE_LIMITING_NOT_YET_CONFIGURED**; no process-local limiter was added. Production enablement and M3 were not started.
+Local live validation: **COMPLETE**. Vercel Preview validation: **PENDING**. Distributed rate limiting: **PENDING**. Production activation: **PENDING**.
+
+Owner-reported explicit live provider validation: **PASS** (`live_audit_schema_passed`). Model: `gpt-6-astra`; elapsed time: **19.802 s** (19,802 ms); input tokens: **786**; output tokens: **1,061**; cached input tokens: **0**; reasoning tokens: **0**; total tokens: **1,847**. Structured Output schema: **PASS**. Qualitative architecture gate: **PASS**. This records the owner's completed run and manual review; no additional billable call was made for this checkpoint.
+
+The reported review confirms deterministic Revit API/rules first, read-only inspection before controlled corrections, AI outside the deterministic execution engine, Revit API constraints, and worksharing/transactions/rollback considerations. No financial ROI arithmetic, guaranteed savings, or unsupported capability claims were reported. The supplied evidence identifies no prompt/schema defect requiring correction. Prompt and schema remain unchanged in this checkpoint. Observe joining artifacts such as `Externalprocessing`, `systemconfiguration`, and `controlledcorrections` during Preview; no systematic defect is established and no speculative text post-processing was added. Token usage is measured; production cost-budget acceptance and deployed latency remain separate gates.
+
+Current rate-limit status: **RATE_LIMITING_NOT_YET_CONFIGURED**. Production enablement and M3 were not started.
 
 The operational runbook in docs/AUDIT_BACKEND.md contains exact existing variables, Preview-only steps, 3 POST requests per IP per 600-second WAF recommendation, coverage verification, timeout/error matrix, troubleshooting, and the explicit activation checklist. SDK timeout remains 45s, browser 55s, Vercel 60s; output cap remains 4,000 with low reasoning/verbosity.
 
-Validation: baseline 15 tests/build/routing passed. Final validation: all 18 offline tests pass; production build passes with existing dependency warnings; Vercel routing conversion/normalization and API exclusions pass; git diff --check passes; source/docs/generated-asset secret-pattern scan passes, no local env file is tracked, and .env.local is ignored. The live command rejects missing credentials before any call. Git: main tracks origin/main with six intended modified files and no new files. M2.1 edits remain uncommitted and unpushed on main for review. Exact next action: privately add OPENAI_API_KEY to ignored .env.local, leave AUDIT_ANALYSIS_ENABLED=false, then run `npm run test:live`. Review schema, architecture, usage, and latency before protected Preview testing. Production remains blocked until all activation gates and explicit authorization are satisfied.
+Validation checkpoint: all 18 offline tests PASS; production build PASS with existing browser-data and Zod comment warnings; Vercel routing normalization/API exclusions PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local is ignored and untracked, confirmed through Git metadata without reading its contents. Existing preparation is already committed as `96871e1`; this checkpoint updates only PROJECT_STATE.md and docs/AUDIT_BACKEND.md with the authorized message `chore: prepare Astra audit production activation`. No history rewrite is needed.
+
+Exact next action: configure a protected Vercel Preview with server-only variables and exact Preview origin, verify external rate limiting/alias coverage, deploy Preview, and run the runbook's end-to-end success/error/routing/log checks. Keep Production AUDIT_ANALYSIS_ENABLED=false/unset. Production remains pending all activation gates and explicit authorization; M3 is not started.

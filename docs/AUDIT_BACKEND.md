@@ -28,7 +28,7 @@ Use ignored `.env.local` locally; configure secrets directly in Vercel for each 
 - `AUDIT_ALLOWED_ORIGIN`: exact site origin with scheme and optional port, no trailing slash or path. Use the deployed canonical origin; separately configure the actual preview origin for staging tests.
 - `VITE_CONTACT_FORM_ENDPOINT`: existing optional public contact configuration, unchanged.
 
-No API key was available during implementation. No live OpenAI call was made. Documentation verifies the model/API interface, but account access and live quality/latency must still be tested.
+The owner has completed local live provider validation successfully; see M2.1 evidence below. Preview and Production environment validation remain pending. Secret values and local environment contents are not inspected or recorded in this checkpoint.
 
 ## Mandatory pre-production protection
 
@@ -79,7 +79,12 @@ M3 follow-up interviewing and M4 deterministic economics remain separate milesto
 ## M2.1 activation status
 
 M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`.
-M2 production activation: **PENDING**. M2.1 is ready for the manual live test; no key is available locally and no live response, token count, latency, model access, Preview deployment, or WAF configuration has been verified. Production was not enabled.
+Local live validation: **COMPLETE**. Vercel Preview validation: **PENDING**. Distributed rate limiting: **PENDING**. Production activation: **PENDING**.
+
+Owner-reported explicit live provider validation: **PASS** (`live_audit_schema_passed`). Model: `gpt-6-astra`; elapsed time: **19.802 s** (19,802 ms); input tokens: **786**; output tokens: **1,061**; cached input tokens: **0**; reasoning tokens: **0**; total tokens: **1,847**. Structured Output schema: **PASS**. Qualitative architecture gate: **PASS**. This records the owner's completed run and manual review; no additional billable call was made for this checkpoint.
+
+The reported review confirms deterministic Revit API/rules first, read-only inspection before controlled corrections, AI outside the deterministic execution engine, Revit API constraints, and worksharing/transactions/rollback considerations. No financial ROI arithmetic, guaranteed savings, or unsupported capability claims were reported. The supplied evidence identifies no prompt/schema defect requiring correction. Prompt and schema remain unchanged in this checkpoint. Observe joining artifacts such as `Externalprocessing`, `systemconfiguration`, and `controlledcorrections` during Preview; no systematic defect is established and no speculative text post-processing was added. Token usage is measured; production cost-budget acceptance and deployed latency remain separate gates.
+
 
 Rate-limit states are operational evidence labels, not new environment variables:
 
@@ -107,19 +112,19 @@ npm run test:live
 
 Missing credentials exit non-zero before a call. This command makes one billable request through the production provider, defaulting to `gpt-6-astra`. It uses the six-person weekly Revit piping QA scenario, validates the actual result schema, prints safe usage/elapsed milliseconds, and prints only that synthetic assessment. It never logs contact identity or the key. Ordinary `npm test` uses injected offline transports only.
 
-A schema pass is not a quality pass. Review the result for Revit API/rules-first inspection, connector topology, parameter checks, controlled tagging, and structured QA reporting. AI should explain or triage findings. Reject autonomous LLM model changes, ignored transaction/API constraints, guaranteed savings, invented BIMCode capabilities, or annual/financial calculations. If needed, adjust instructions minimally and repeat the explicit test. No live quality claim is currently made.
+A schema pass is not a quality pass. Review the result for Revit API/rules-first inspection, connector topology, parameter checks, controlled tagging, and structured QA reporting. AI should explain or triage findings. Reject autonomous LLM model changes, ignored transaction/API constraints, guaranteed savings, invented BIMCode capabilities, or annual/financial calculations. If needed, adjust instructions minimally and repeat the explicit test. The owner-reported local quality gate has passed; repeat observation on Preview.
 
 Capture returned model, inputTokens, cachedInputTokens, outputTokens, reasoningTokens, totalTokens, and elapsedMs. Estimate provider cost from the returned model's current published rates: uncached input = input minus cached input; price those categories separately and price output once. Reasoning tokens are included in output, so do not add them again; total tokens are not a separate billable category. Pricing is intentionally not hard-coded. Record a reviewed per-audit budget before accepting usage. Invalid/incomplete parses can lack usable metadata.
 
 ## Output and timeout review
 
-The stable instruction prefix remains short; only the operational-context sentence changed. Existing strict string limits and five-item array limits remain. Low reasoning effort, low verbosity, and the 4,000 output-token cap balance useful architecture fields against output size; live measurement is still needed. Do not increase the cap automatically after truncation.
+The stable instruction prefix remains short; only the operational-context sentence changed. Existing strict string limits and five-item array limits remain. Low reasoning effort, low verbosity, and the 4,000 output-token cap balance useful architecture fields against output size; the successful local run used 1,061 output tokens; Preview measurement is still needed. Do not increase the cap automatically after truncation.
 
 SDK timeout is **45 seconds**, retries **0**, Vercel maxDuration **60 seconds**, and browser abort **55 seconds**. The handler maps SDK timeout to controlled JSON 504; the UI retains input and displays retryable failure. Offline tests simulate timeout and provider errors; real deployment timing remains pending. Confirm the deployed runtime honors the configured 60-second limit before enablement.
 
 ## Preview-only procedure
 
-1. Confirm the intended Vercel project and supported Node runtime. Use a protected non-production branch Preview or explicit `vercel` Preview deployment (never `--prod`). This task does not deploy or push.
+1. Confirm the intended Vercel project and supported Node runtime. Use a protected non-production branch Preview or explicit `vercel` Preview deployment (never `--prod`). A Git checkpoint/push does not establish Preview validation or authorize Production enablement.
 2. Select a stable branch Preview hostname; set `AUDIT_ALLOWED_ORIGIN` to its exact `https://hostname` without a slash. Access the audit through that hostname. Commit-specific aliases with different origins are intentionally rejected. Locally use the exact Vite origin, e.g. `http://localhost:5173`; Production uses `https://www.bimcodesolutions.com`.
 3. Project Settings > Environment Variables: scope `OPENAI_API_KEY`, optional `OPENAI_MODEL=gpt-6-astra`, `AUDIT_ALLOWED_ORIGIN`, and `AUDIT_ANALYSIS_ENABLED=true` to **Preview only**, preferably the test branch. Keep Production `AUDIT_ANALYSIS_ENABLED=false` or absent. Never prefix secrets with `VITE_`.
 4. Verify protection/WAF coverage before public access. Deploy/redeploy Preview after saving variables; changes apply to new deployments. See [Vercel environment scopes](https://vercel.com/docs/environment-variables).
@@ -150,9 +155,9 @@ External WAF may return non-JSON bodies: verify the UI still shows a safe failur
 - [x] Automated offline tests pass.
 - [x] Production build passes.
 - [x] Local routing validation passes.
-- [ ] Live `gpt-6-astra` access/test passes.
-- [ ] Live Structured Output validates against the real schema.
-- [ ] Human architecture review passes.
+- [x] Live `gpt-6-astra` access/test passes. (Owner-reported local validation.)
+- [x] Live Structured Output validates against the real schema. (Owner-reported local validation.)
+- [x] Human architecture review passes. (Owner-reported local validation.)
 - [ ] Measured token usage/cost is accepted.
 - [x] Provider timeout/error mapping verified offline.
 - [ ] Deployed timeout budget and error UX verified.
