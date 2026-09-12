@@ -1,3 +1,4 @@
+import AuditAnalysis from "../features/audit/AuditAnalysis.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -49,6 +50,7 @@ export default function AuditPage() {
   const [form, setForm] = useState(createInitialIntake);
   const [errors, setErrors] = useState({});
   const [submission, setSubmission] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const resultHeading = useRef(null);
   const formHeading = useRef(null);
   const editing = useRef(false);
@@ -143,9 +145,9 @@ export default function AuditPage() {
             approaches.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Try the workflow intake now. You can review your inputs here;
-            automated analysis and ROI reports are coming next. Savings depend
-            on your workflow and its constraints.
+            Describe your workflow, review your inputs, and request an
+            assessment; technical analysis identifies opportunities and
+            unknowns. Savings depend on your workflow and its constraints.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
@@ -172,8 +174,9 @@ export default function AuditPage() {
           A practical path from repetitive work to a plan
         </h2>
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-          Start with step 1 today. Automated assessment in steps 2 and 3 is
-          planned; you can also request a manual review.
+          Describe the work, request an initial technical assessment, and review
+          possible approaches. Numerical ROI reports are planned; manual review
+          is available.
         </p>
         <ol className="mt-6 grid gap-5 md:grid-cols-3">
           {[
@@ -183,11 +186,11 @@ export default function AuditPage() {
             ],
             [
               "BIMCode analyzes its automation potential",
-              "The planned analysis will examine rules, constraints, and suitable tooling.",
+              "The analysis examines rules, constraints, and suitable tooling.",
             ],
             [
-              "Receive an implementation and ROI assessment",
-              "The planned report will explain approaches, estimates, and the assumptions behind them.",
+              "Review a technical assessment",
+              "Review opportunities, risks, and unknowns. Financial ROI is not calculated yet.",
             ],
           ].map(([title, description], index) => (
             <li key={title} className={cardClass}>
@@ -223,8 +226,9 @@ export default function AuditPage() {
               role="status"
               className="mt-3 text-slate-600 dark:text-slate-300"
             >
-              Your inputs are ready to review. No AI analysis has been
-              generated, and nothing has been sent to BIMCode.
+              Review your inputs below, then choose Analyze Workflow to request
+              an assessment. Editing returns to the form and clears the
+              assessment.
             </p>
             <dl className="mt-8 grid gap-6 sm:grid-cols-2">
               {[
@@ -272,15 +276,19 @@ export default function AuditPage() {
                 </div>
               ))}
             </dl>
+            <AuditAnalysis
+              submission={submission}
+              onBusyChange={setIsAnalyzing}
+            />
             <div className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-800">
               <h3 className="text-lg font-semibold">
                 Want to discuss this workflow?
               </h3>
               <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                Full automated analysis is the next stage of this product. For a
-                manual review, use our existing consultation form. Your intake
-                is not transferred to that form; include the workflow details
-                you want to discuss.
+                For help validating the assessment or planning implementation,
+                request a manual review using our existing consultation form.
+                Your intake is not transferred to that form; include the
+                workflow details you want to discuss.
               </p>
               <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
                 This preview is held only on this page. Refreshing, leaving, or
@@ -289,7 +297,8 @@ export default function AuditPage() {
               <div className="mt-6 flex flex-wrap gap-4">
                 <button
                   type="button"
-                  className="btn-ghost px-6 py-3 text-sm font-semibold"
+                  disabled={isAnalyzing}
+                  className="btn-ghost px-6 py-3 text-sm font-semibold disabled:opacity-60"
                   onClick={() => {
                     editing.current = true;
                     setSubmission(null);
@@ -321,8 +330,9 @@ export default function AuditPage() {
               required.
             </p>
             <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-              Your details stay in memory on this page. This form does not send
-              or save them, and they clear when you leave or refresh.
+              Your draft stays in memory on this page. Reviewing it does not
+              send it. Choosing Analyze Workflow in the next step sends it for
+              analysis. Leaving or refreshing clears the draft.
             </p>
             <form onSubmit={submit} noValidate className="mt-8 space-y-6">
               <fieldset className={cardClass}>

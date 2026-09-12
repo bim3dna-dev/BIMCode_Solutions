@@ -8,14 +8,16 @@
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
-- Active next milestone: M2 — secure server-side OpenAI/Astra integration with schema-validated structured output. Not started; requires its own task.
+- Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; credentials/model access, live testing, deployed routing verification, and production rate limiting remain activation requirements.
+- Latest committed checkpoint: `19c0e1e4af39af3369c896d687293d42931ab3fb` — feat: add production workflow demo (M1.2 closure), on main/origin/main.
+- Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
 ## Production State
 
 The owner reports the website live at https://www.bimcodesolutions.com. The repository contains a static React/Vite website and Vercel SPA rewrite configuration. The deployed commit, live hosting account/settings, automatic deployment trigger, and production contact endpoint have not been independently verified. No production deployment or contact submission was performed during M0.
 
-The consultancy BIM Automation Audit remains available through contact inquiries. M1 adds `/audit` with workflow intake and a local input summary and is committed on `origin/main`. Its live deployment status has not been verified. No server/API layer, model integration, generated analysis, report purchase, payment provider, or conversion analytics implementation exists. M0 and M1 pushes succeeded; whether Git pushes trigger hosting automation remains unverified. No deployment command or external form submission was performed. M1.1 preserves the existing homepage demo placeholder.
+The consultancy BIM Automation Audit remains available through contact inquiries. M1 adds `/audit` with workflow intake and a local input summary and is committed on `origin/main`. Its live deployment status has not been verified. The committed production baseline has no analysis backend. Local M2 now adds a disabled-by-default server function and assessment UI; it has not been deployed or tested against a live model. No payment provider, report purchase, or conversion analytics implementation exists. M0 and M1 pushes succeeded; whether Git pushes trigger hosting automation remains unverified. No deployment command or external form submission was performed. M1.1 preserves the existing homepage demo placeholder.
 
 ## Current Business Objective
 
@@ -59,7 +61,7 @@ Complete and manually production-reviewed by the owner: the production workflow 
 
 ### M2 — AI Audit Engine
 
-Not started. Introduce secure server-side integration with the selected OpenAI model, structured outputs, and schema validation. The developer refers to an available model as GPT-6 Astra; this is not a verified production API identifier. Verify the exact API model identifier and supported interface before integration. Credentials must never reach browser code. No model identifier is selected during M0.
+Implemented locally: POST `/api/audit/analyze`, official OpenAI Responses SDK, shared strict schemas, data minimization, safe errors, usage logging, and structured assessment UI. Current official documentation verifies `gpt-6-astra`, Responses, Structured Outputs, and low reasoning effort. Account access and live behavior remain unverified. Production blockers and validation are recorded in the M2 section below. M3 is not started.
 
 ### M3 — Dynamic Diagnostic Interview
 
@@ -180,7 +182,7 @@ Final local Git state: modified `.gitignore` and `README.md`; untracked `.env.ex
 
 ## Known Issues and Limits
 
-- No ESLint configuration despite a lint script. No npm test script or broad regression suite; M1 adds narrowly scoped tests using Node's built-in runner.
+- No ESLint configuration despite a lint script. M2 adds `npm test` with shared schema/server/provider tests alongside the original M1 tests; there is no broad repository browser regression suite.
 - `src/sections/LogosSection.jsx` imports `partnerLogos`, which is not exported by `src/data/content.js`. It is unused by the current page graph; mounting it would require a fix.
 - Generated `dist/` is tracked. Builds can dirty the working tree; review artifacts separately from source changes.
 - Dependency installation reports deprecated packages, including ESLint 8. No dependency upgrade is included; installation with `--no-audit` is not a security audit.
@@ -289,10 +291,70 @@ Validation on 2026-09-12:
 - Frame ratio and no horizontal overflow verified at 360, 768, and 1440px; screenshots captured. No uncaught page errors.
 - Restricted browser access initially could not load the external player. Network-enabled verification returned HTTP 200 for the embed, loaded the YouTube HTML5 player, and observed its video paused at time 0. No autoplay occurred. The owner subsequently confirmed that M1.2 passed manual production review.
 
+## M2 — Secure Astra Analysis Backend
+
+M2 implementation: **COMPLETE**. M2 production activation: **PENDING**. The owner confirmed local/offline review passed. Closure validation repeated all 15 tests, production build, Vercel routing validation, and diff checks successfully. No live OpenAI call or backend enablement was performed. M3, payments, authentication, database, and social publishing were not started.
+
+### Architecture and dependencies
+
+- Endpoint: `POST /api/audit/analyze`, Vercel Node.js Web Standard function (`export default { fetch }`), 60-second max duration, no Express/persistent server framework.
+- Official SDK `openai@7.15.0`; `zod@4.6.2` for shared input/output validation and Structured Outputs. Both pinned as production dependencies. No other production dependency added.
+- Model: server default `gpt-6-astra`; Responses `responses.parse()` with `zodTextFormat`, reasoning low, verbosity low, 4,000 output tokens, 45-second SDK timeout, no retries, `store: false`. No tools, streaming, background mode, or conversation persistence.
+- Stable server instruction prefix establishes BIM/AEC/Revit expertise, deterministic automation preference, transaction/version/standards constraints, uncertainty, and no economics or unsupported capability claims. User JSON is treated as untrusted workflow data, not instructions.
+- `shared/audit-options.js` centralizes the existing M1 limits/enums. Strict normalized input validation runs in both browser normalization and server request handling. Field types, lengths, enum values, custom interval rules, numeric bounds, and unknown keys are checked. No coercion of HTTP input types.
+- Model data is allowlisted qualitative workflow context. Name, email, company, role, duration, participant count, and occurrence counts do not enter the model request. Free-text anonymization is not claimed; the UI tells visitors to remove sensitive data before analysis.
+- Strict output includes summary, feasibility estimate/score/rationale, classification, up to five opportunities, technical architecture, risks, unknowns, and recommended engagement. No ROI/cost schema fields. SDK-parsed output is independently validated again; the browser also validates before rendering escaped React text.
+- UI: intake → local review → explicit Analyze Workflow → loading → assessment or controlled retryable error. Duplicate submissions and editing while loading are disabled. Draft remains on errors; editing clears the assessment. No automatic lead capture/email or database persistence.
+- Safe usage logs include model, input/output tokens, cached input tokens, and safe failure category/status only. No submitted text, identities, provider messages, stack traces, or keys are logged by the application.
+
+### Files and environment
+
+Added:
+
+- `api/audit/analyze.js` — function entry point.
+- `server/audit/handler.js`, `provider.js` — bounded HTTP handling, minimized provider request, instructions, controlled responses, usage logging.
+- `server/audit/fixtures.js`, `handler.test.js` — synthetic offline fixtures and boundary/schema/SDK transport tests.
+- `shared/audit-options.js`, `audit-input.js`, `audit-result.js` — shared options and contracts.
+- `src/features/audit/AuditAnalysis.jsx` — request/loading/error/result UI.
+- `scripts/dev-api.js`, `scripts/check-audit-live.js` — local adapter and explicit billable synthetic provider smoke test.
+- `docs/AUDIT_BACKEND.md` — architecture, operations, pre-production checks, and official source references.
+
+Modified: `.env.example`, `README.md`, `PROJECT_STATE.md`, `package.json`, `package-lock.json`, `src/features/audit/workflow.js`, `src/pages/AuditPage.jsx`, `vite.config.js`, `vercel.json`, and regenerated `dist/` index/CSS/JS. Existing contact form, homepage/video, navigation, routes, and other pages remain unchanged.
+
+Server environment: `OPENAI_API_KEY` (secret), `OPENAI_MODEL` (default `gpt-6-astra`), `AUDIT_ANALYSIS_ENABLED` (default disabled; exactly true enables), `AUDIT_ALLOWED_ORIGIN` (exact browser origin). Existing public `VITE_CONTACT_FORM_ENDPOINT` remains unchanged. No real key is present in `.env.example`; server variables never use a VITE prefix.
+
+### Abuse protection and production blockers
+
+Implemented: POST-only, JSON/uncompressed request checks, 32 KiB limit on declared and streamed bytes, strict schema, exact configured Origin and Fetch Metadata checks, no CORS allow headers, fixed server-controlled model/output/time settings, no-store responses, and a fail-closed enable flag. Origin checks and disabled UI buttons are not authentication or rate limiting.
+
+**No deployment-wide rate limiter is configured or verified.** Keep `AUDIT_ANALYSIS_ENABLED=false` until a Vercel Firewall rate-limit rule or equivalent trusted distributed/edge protection for POST `/api/audit/analyze` is configured and tested across production/preview aliases. A serverless process-local counter is deliberately not presented as protection. See `docs/AUDIT_BACKEND.md` for release procedure.
+
+Remaining blockers:
+
+1. Provision the key server-side and verify this account can call `gpt-6-astra`; run the explicit synthetic live test. No key was available in the process or `.env.local` during this session.
+2. Configure and verify deployed rate limiting and provider spend controls before enabling public paid calls.
+3. Verify actual Vercel project settings/function deployment, environment scope, max duration, and direct API routing on a protected preview. Local routing checks do not prove a live deployment.
+
+The M2 code is reviewable, but M2 must not be marked ready for production or advanced to M3 until these checks are resolved. Payment, persistent sessions, and dynamic interviewing remain out of scope.
+
+### Validation on 2026-09-12
+
+| Check | Result |
+| --- | --- |
+| Baseline | Clean `main` at `19c0e1e`; original 4 tests and production build passed before edits. |
+| SDK verification | Official Astra/Structured Outputs pages opened; installed SDK source confirms Responses parse and Zod helper. Pinned SDK transport test passed with an intercepted synthetic response, no network call. |
+| Offline tests | `npm test`: 15 passed, 0 failed (original 4 plus 11 server/schema/provider/routing cases containing multiple rejection checks). Covers strict input, minimization, output validity, limits, origin, disabled config, auth/model errors, timeout/network, refusal, incomplete responses, safe logs, and request configuration. |
+| Build | `npm run build` passed, 1,620 modules. Existing browser-data warnings remain; Zod introduces two harmless Rollup comment-annotation warnings. No dependency warning fixes included. |
+| Lint | Still fails due to pre-existing missing ESLint configuration. |
+| Local HTTP | Real local function adapter through Vite proxy returns controlled 503 with missing enablement/key, retaining draft. No model call. |
+| Browser | Mocked success, duplicate lock, result focus/sections, rate-limit and malformed-success errors, edit retention/result clearing, and manual contact CTA passed. Existing homepage/video, products redirect, solutions, case study, blog, about/contact anchors passed with no uncaught page errors. |
+| Responsive | Assessment checked at 360, 768, 1440px with no horizontal overflow; mobile screenshot inspected and dark mode checked. Success content was explicitly a test fixture, never a production fallback. |
+| Vercel routing | API paths explicitly excluded from SPA rewrite. Vercel's temporary `@vercel/routing-utils` converted/normalized the rewrite with no error; unit checks cover API exclusion and SPA paths. Actual deployment remains unverified. |
+| Secrets / scope | No real credentials introduced. Built assets contain no OPENAI_API_KEY, server model instructions, or provider schema-name marker. Final source/diff review and `git diff --check` passed. |
+| Live API | Not performed. `npm run test:live` exists as an explicit billable test using synthetic input; it never runs with npm test. |
+
 ## Current Git Handoff and Exact Next Action
 
-Branch: `main`. M1.2 implementation was already committed as `4958435ee94592419561f6eb567a9cf687b71249` when closure began; its diff contains only the demo component, project state, and generated assets. The closure commit uses `feat: add production workflow demo` and records the completed review without rewriting history. Resolve its final hash and remote synchronization with `git log -1` and `git status`. Closure validation: all 4 existing tests passed, production build passed with existing browser-data warnings, and `git diff --check` passed. No new application changes, M2 implementation, or social publication were made during closure.
+Branch: `main`. M2 implementation closure uses the dedicated commit message `feat: add secure Astra audit backend`, following `19c0e1e4af39af3369c896d687293d42931ab3fb` (M1.2). Resolve the closure commit hash and remote synchronization from `git log -1` and `git status`; do not infer activation from a Git push. Only intended M2 source, tests, configuration, documentation, and generated assets are included. No credentials were introduced. `AUDIT_ANALYSIS_ENABLED=false` remains the default; the endpoint requires explicit enablement before provider calls. The standalone billable live test requires explicit invocation and was not run. No backend enablement or M3 work was performed.
 
-Exact next action: await the separately authorized M2 task. M1.2 is complete and manual production review has passed. The active next milestone is **M2 — Secure Astra/OpenAI analysis backend**; no M2 work has started.
-
-For the next authorized M2 task: read repository instructions and state, reproduce tests/build and the known lint baseline, then verify the exact production OpenAI/Astra API model identifier and supported API interface. Select a secure server execution boundary compatible with the verified hosting setup, define request/response schemas using the normalized intake, add server input/output validation and production rate limiting, and keep credentials server-side. Objective: secure server-side OpenAI/Astra integration with schema-validated structured output. Do not infer the model identifier from the developer's display name, and do not introduce M5 payments.
+Exact next action: await a separately authorized production activation task. Implementation review is complete. That task must provision server configuration on a protected environment, verify model access with the explicit live test, and configure/test deployment-wide rate limiting and Vercel function routing. Only then enable analysis and evaluate real assessment quality before production approval. Do not paste credentials into chat or commit them. M3 remains **Dynamic diagnostic interview / follow-up questioning**, not started and not authorized by this task.

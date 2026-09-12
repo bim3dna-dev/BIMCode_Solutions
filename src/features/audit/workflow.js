@@ -1,40 +1,17 @@
-export const disciplines = [
-  "Architecture",
-  "Structural",
-  "Mechanical",
-  "Electrical",
-  "Plumbing",
-  "BIM/VDC",
-  "General Contractor / Construction",
-  "Other",
-];
-export const softwareOptions = [
-  "Revit",
-  "AutoCAD",
-  "Navisworks",
-  "Dynamo",
-  "Excel",
-  "BIM 360 / Autodesk Construction Cloud",
-  "Other",
-];
-export const frequencyOptions = [
-  "daily",
-  "weekly",
-  "monthly",
-  "per project",
-  "custom",
-];
-export const textLimits = {
-  name: 120,
-  email: 254,
-  company: 160,
-  role: 120,
-  title: 160,
-  description: 4000,
-  revitVersion: 40,
-  painPoint: 1000,
-  desiredOutcome: 1000,
-};
+import {
+  disciplines,
+  softwareOptions,
+  frequencyOptions,
+  textLimits,
+  numericLimits,
+} from "../../../shared/audit-options.js";
+import { auditInputSchema } from "../../../shared/audit-input.js";
+export {
+  disciplines,
+  softwareOptions,
+  frequencyOptions,
+  textLimits,
+} from "../../../shared/audit-options.js";
 
 export const createInitialIntake = () => ({
   name: "",
@@ -66,7 +43,7 @@ export const createInitialIntake = () => ({
  * participants: number, painPoint: string, desiredOutcome: string}} workflow
  */
 
-// Client-side UX validation only. M2 must independently validate requests on the server.
+// Friendly form errors use shared limits; normalization and server requests use the shared strict schema.
 export function validateIntake(form) {
   const errors = {};
   for (const [field, limit] of Object.entries(textLimits)) {
@@ -98,9 +75,11 @@ export function validateIntake(form) {
   )
     errors.software = "Select tools from the list.";
   for (const [field, max] of [
-    ["occurrences", 10000],
-    ["participants", 10000],
-    ...(form.frequencyType === "custom" ? [["intervalDays", 3650]] : []),
+    ["occurrences", numericLimits.count],
+    ["participants", numericLimits.count],
+    ...(form.frequencyType === "custom"
+      ? [["intervalDays", numericLimits.intervalDays]]
+      : []),
   ]) {
     const value = Number(form[field]);
     if (!Number.isSafeInteger(value) || value < 1 || value > max)
@@ -108,7 +87,10 @@ export function validateIntake(form) {
         `Enter a whole number from 1 to ${max.toLocaleString("en")}.`;
   }
   const duration = Number(form.duration);
-  const maxDuration = form.durationUnit === "minutes" ? 60000 : 1000;
+  const maxDuration =
+    form.durationUnit === "minutes"
+      ? numericLimits.minutes
+      : numericLimits.hours;
   if (!Number.isFinite(duration) || duration <= 0 || duration > maxDuration)
     errors.duration = `Enter a duration greater than 0 and no more than ${maxDuration.toLocaleString("en")} ${form.durationUnit}.`;
   return errors;
@@ -119,7 +101,7 @@ export function normalizeIntake(form) {
   if (Object.keys(validateIntake(form)).length)
     throw new Error("Invalid workflow intake");
   const trimmed = (key) => form[key].trim();
-  return {
+  return auditInputSchema.parse({
     schemaVersion: 1,
     contact: {
       name: trimmed("name"),
@@ -148,7 +130,7 @@ export function normalizeIntake(form) {
       painPoint: trimmed("painPoint"),
       desiredOutcome: trimmed("desiredOutcome"),
     },
-  };
+  });
 }
 
 export function describeFrequency(frequency) {

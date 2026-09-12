@@ -6,7 +6,7 @@ BIMCode Solutions provides BIM automation, Revit API, Python, pyRevit, and AI-as
 
 Production URL: https://www.bimcodesolutions.com (provided by the project owner).
 
-Static React 18 single-page application using Vite 7, React Router 6, Tailwind CSS 3, PostCSS/Autoprefixer, and lucide-react icons. Vercel configuration is checked in as `vercel.json`. The hosting account, linked repository, production branch, and dashboard settings are not recorded and require owner verification. There is no application backend, database, authentication, payment system, or AI integration in this repository.
+React 18/Vite 7 single-page application using React Router 6, Tailwind CSS 3, PostCSS/Autoprefixer, and lucide-react icons. A Vercel Node.js function provides workflow assessment through the official OpenAI SDK. Zod defines shared validation contracts. There is no database, authentication, or payment system. Deployment account/settings and API enablement must be verified with the owner; the analysis endpoint is disabled by default until production protections are configured.
 
 ## Local development
 
@@ -18,24 +18,30 @@ npm run dev
 npm run build
 npm run preview
 npm run lint
-node --test src/features/audit/workflow.test.js
+npm test
 ```
 
 - `dev`: starts Vite; use the printed local URL.
 - `build`: produces static assets in `dist/`.
 - `preview`: serves the production build locally; build first. This is not a production server.
 - `lint`: invokes `eslint .`; the repository currently lacks ESLint configuration. See `PROJECT_STATE.md` for validation results.
-- Audit model checks use Node's built-in test runner: `node --test src/features/audit/workflow.test.js`. There is no npm test script or browser-test dependency.
+- `npm test`: Node's built-in test runner for intake, server boundary, output validation, and mocked SDK transport. No live model call or browser dependency is required.
+- For local API development, use Node 22.12+ (validated on Node 24), copy `.env.example` to ignored `.env.local`, and run `npm run dev:api` in a second terminal alongside `npm run dev`. Vite proxies `/api` to the local-only adapter on `127.0.0.1:3001`. Set `AUDIT_ALLOWED_ORIGIN` to the exact Vite browser origin, including its port. `npm run preview` serves only built frontend assets; it does not run Vercel functions.
+- `npm run test:live` is an explicit **billable** provider smoke test using synthetic workflow data. It requires a server-side key and never runs with `npm test`. See [Audit backend operations](docs/AUDIT_BACKEND.md).
 
 ## Environment variables and contact
 
-No environment variables are required for installation, build, or local operation.
+No environment variables are needed for installation, frontend builds, or offline tests. The analysis service requires server configuration:
 
 | Variable | Required | Behavior |
 | --- | --- | --- |
 | `VITE_CONTACT_FORM_ENDPOINT` | No | Public JSON POST endpoint. Empty/absent opens a prefilled email in the visitor's email application; the visitor must send it. |
+| `OPENAI_API_KEY` | For analysis | Server-side secret only; never use a `VITE_` prefix or commit a real key. |
+| `OPENAI_MODEL` | No | Server-selected model, default `gpt-6-astra`. Client model overrides are rejected. |
+| `AUDIT_ANALYSIS_ENABLED` | For analysis | Defaults to disabled. Set exactly `true` only after model access and production rate limiting are verified. |
+| `AUDIT_ALLOWED_ORIGIN` | For analysis | One exact browser origin, no trailing slash, e.g. `https://www.bimcodesolutions.com`. Use the actual preview origin for preview testing. |
 
-Copy `.env.example` to `.env.local` when configuring an endpoint. Restart development or rebuild after changing it. Set equivalent public values in the deployment build environment. Vite embeds `VITE_*` values in browser assets: never use credentials, API keys, or URLs containing secrets.
+Copy `.env.example` to ignored `.env.local` for local configuration. Restart the relevant development process after changes. Configure server variables in the Vercel environment settings, never in browser code. Vite embeds `VITE_*` values in browser assets: only public contact configuration belongs there. Do not broaden Vite's environment prefix to expose server secrets.
 
 `src/sections/ContactSection.jsx` handles inquiry types `audit`, `tool`, and `retainer`, required name/email/workflow fields, optional company, submission feedback, and the email fallback. Query parameters such as `/?inquiry=tool#contact` select the inquiry type. JSON fields are `inquiryType`, `intent`, `fullName`, `email`, `company`, `workflowToAutomate`, `timestamp`, and `source`. The endpoint must accept JSON and allow the website origin through CORS. Failed endpoint requests show an error and contact email; they do not automatically send email.
 
@@ -52,6 +58,10 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 | `src/sections/` | Homepage sections and contact form; not all sections are mounted |
 | `src/data/content.js` | Static offers, solutions, benefits, outcomes, services, blog posts |
 | `src/features/audit/` | Intake options, validation, normalization, JSDoc model, and model tests |
+| `shared/` | Shared intake enums/limits, strict normalized input and assessment schemas |
+| `api/audit/analyze.js` | Vercel Node.js Web Standard function entry point |
+| `server/audit/` | Bounded request handling, provider boundary/instructions, safe usage logging, offline tests |
+| `scripts/` | Local HTTP adapter and explicit live API smoke test |
 | `src/theme/` | Light/dark theme, system preference, localStorage persistence |
 | `src/index.css`, `tailwind.config.js`, `postcss.config.js` | Global CSS, class-based dark mode, brand palette, CSS processing |
 | `src/assets/`, `public/` | Bundled media and directly copied public assets |
@@ -63,11 +73,11 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 
 Routes: `/`, `/solutions`, `/case-study`, `/blog`, `/blog/:slug`, `/audit`. `/products` redirects to `/solutions`. Contact is the homepage section at `/#contact`, not a `/contact` route. Unknown paths show the not-found page; unknown blog slugs redirect to `/blog`. Content comes from local JavaScript, with no CMS or remote content API.
 
-The Audit page provides workflow intake and a local confirmation preview. It makes no network submission, does not generate analysis, and keeps contact/workflow data only in component memory until navigation or refresh. Its manual-review CTA opens `/?inquiry=audit#contact`; intake details are not transferred. The isolated model stores explicit frequency counts, a day interval for custom periods, duration/unit per person per occurrence, and participant count. It does not infer annual working days or project counts. Future server endpoints must independently validate requests.
+The Audit flow is intake → review → explicit Analyze Workflow → technical assessment or retryable error. Review stays local. Analysis posts the normalized intake to `/api/audit/analyze`, where identity fields are validated but excluded from the model request. Only qualitative workflow context reaches OpenAI; effort numbers are also excluded. Free text is not automatically anonymized, so visitors are told to remove sensitive information. No leads are silently submitted and no database is used. Draft/result state clears on navigation or refresh. The manual-review CTA still opens `/?inquiry=audit#contact` without transferring intake details. No ROI arithmetic or dynamic interview is implemented.
 
 ## Deployment
 
-The repository-supported workflow is `npm ci`, `npm run build`, then static hosting of `dist/`. `vercel.json` rewrites `/(.*)` to `/index.html` for SPA route loads. Preserve this fallback if changing hosts.
+The repository-supported Vercel workflow installs with `npm ci`, builds frontend assets with `npm run build`, serves `dist/`, and deploys `api/audit/analyze.js` as a Node.js function with a 60-second maximum duration. `vercel.json` excludes `/api` paths from the SPA fallback so API requests cannot become HTML. Plain static hosting alone cannot provide analysis. See [Audit backend operations](docs/AUDIT_BACKEND.md) for the mandatory rate-limit and deployment checks before enabling paid model calls.
 
 No deployment script, CI workflow, Vercel project link, or automatic Git deployment trigger is checked in. Before releasing, verify the linked Vercel project, production branch/domain, Node version, build command, output directory, and public contact endpoint with the owner. Do not assume a push deploys production. Rebuild from source; tracked `dist/` may be stale and generated changes need separate review.
 
