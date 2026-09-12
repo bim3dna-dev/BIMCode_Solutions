@@ -18,13 +18,14 @@ npm run dev
 npm run build
 npm run preview
 npm run lint
+node --test src/features/audit/workflow.test.js
 ```
 
 - `dev`: starts Vite; use the printed local URL.
 - `build`: produces static assets in `dist/`.
 - `preview`: serves the production build locally; build first. This is not a production server.
 - `lint`: invokes `eslint .`; the repository currently lacks ESLint configuration. See `PROJECT_STATE.md` for validation results.
-- No test script, suite, or test runner is configured.
+- Audit model checks use Node's built-in test runner: `node --test src/features/audit/workflow.test.js`. There is no npm test script or browser-test dependency.
 
 ## Environment variables and contact
 
@@ -50,6 +51,7 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 | `src/components/` | Shared layout, header, footer, theme toggle |
 | `src/sections/` | Homepage sections and contact form; not all sections are mounted |
 | `src/data/content.js` | Static offers, solutions, benefits, outcomes, services, blog posts |
+| `src/features/audit/` | Intake options, validation, normalization, JSDoc model, and model tests |
 | `src/theme/` | Light/dark theme, system preference, localStorage persistence |
 | `src/index.css`, `tailwind.config.js`, `postcss.config.js` | Global CSS, class-based dark mode, brand palette, CSS processing |
 | `src/assets/`, `public/` | Bundled media and directly copied public assets |
@@ -59,7 +61,9 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 | `docs/AI_TASKS.md` | Empty legacy placeholder |
 | `git-filter-repo.py` | History utility, outside application runtime/build |
 
-Routes: `/`, `/solutions`, `/case-study`, `/blog`, `/blog/:slug`. `/products` redirects to `/solutions`. Unknown paths show the not-found page; unknown blog slugs redirect to `/blog`. Content comes from local JavaScript, with no CMS or remote content API. `/audit` is planned.
+Routes: `/`, `/solutions`, `/case-study`, `/blog`, `/blog/:slug`, `/audit`. `/products` redirects to `/solutions`. Contact is the homepage section at `/#contact`, not a `/contact` route. Unknown paths show the not-found page; unknown blog slugs redirect to `/blog`. Content comes from local JavaScript, with no CMS or remote content API.
+
+The Audit page provides workflow intake and a local confirmation preview. It makes no network submission, does not generate analysis, and keeps contact/workflow data only in component memory until navigation or refresh. Its manual-review CTA opens `/?inquiry=audit#contact`; intake details are not transferred. The isolated model stores explicit frequency counts, a day interval for custom periods, duration/unit per person per occurrence, and participant count. It does not infer annual working days or project counts. Future server endpoints must independently validate requests.
 
 ## Deployment
 

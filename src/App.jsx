@@ -6,6 +6,7 @@ import CaseStudyPage from "./pages/CaseStudyPage.jsx";
 import BlogPage from "./pages/BlogPage.jsx";
 import BlogDetailPage from "./pages/BlogDetailPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import AuditPage from "./pages/AuditPage.jsx";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="solutions" element={<ProductsPage />} />
+        <Route path="audit" element={<AuditPage />} />
         <Route path="products" element={<Navigate to="/solutions" replace />} />
         <Route path="case-study" element={<CaseStudyPage />} />
         <Route path="blog" element={<BlogPage />} />

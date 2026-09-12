@@ -4,15 +4,16 @@
 
 - Last updated: 2026-09-12 (Europe/Sarajevo).
 - Current branch: `main`.
-- Latest relevant commit: `f58c1ec6151fc99ef2b14c21bfccec9bb49f3fa0` — Add Vercel SPA rewrite configuration (2026-09-01).
-- Current milestone: M0 — Repository Baseline and Cross-Machine Handoff. Complete locally with pre-existing validation gaps documented; commit/push remains the transfer step.
-- M1 has not started. This file is the canonical handoff; do not rely on chat history.
+- Latest relevant commit / M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774` — docs: establish project baseline and handoff state. Successfully pushed to `origin/main` on 2026-09-12.
+- Current milestone: M1 — AI Audit Product Surface. Complete locally and validated; ready for browser review, intentionally uncommitted and unpushed.
+- Next milestone: M2 — secure server-side OpenAI/Astra integration with schema-validated structured output. Not started; requires its own task.
+- This file is the canonical handoff; do not rely on chat history.
 
 ## Production State
 
 The owner reports the website live at https://www.bimcodesolutions.com. The repository contains a static React/Vite website and Vercel SPA rewrite configuration. The deployed commit, live hosting account/settings, automatic deployment trigger, and production contact endpoint have not been independently verified. No production deployment or contact submission was performed during M0.
 
-The current BIM Automation Audit is a consultancy inquiry offering. The planned interactive AI Automation Audit does not exist yet: no `/audit`, server/API layer, model integration, report purchase, payment provider, or conversion analytics implementation exists.
+The production baseline's BIM Automation Audit is a consultancy inquiry offering. Local M1 adds `/audit` with workflow intake and a local input summary; it has not been pushed or deployed. No server/API layer, model integration, generated analysis, report purchase, payment provider, or conversion analytics implementation exists. The authorized M0 documentation push succeeded; whether that push triggered hosting automation remains unverified. No deployment command or external form submission was performed.
 
 ## Current Business Objective
 
@@ -40,11 +41,11 @@ The workflow demo is explicitly a coming-soon placeholder. Legacy `LogosSection.
 
 ### M0 — Repository Baseline and Cross-Machine Handoff
 
-Documentation, environment baseline, and validated repository state. Scope is documentation/repository state only; preserve application behavior. See validation and handoff sections for completion status.
+Complete. Documentation/environment baseline committed separately as `4f279634a871ba2cab7dcc282be750e45e645774` and pushed to the configured GitHub remote (`origin/main`). Build and diff checks passed before committing. Only README, PROJECT_STATE, .env.example, and .gitignore were included; no secrets were found.
 
 ### M1 — AI Audit Product Surface
 
-Not started. Add `/audit`, an Audit landing page, and workflow intake UX. No production AI dependency yet.
+Complete locally, validated, ready for browser review. `/audit` includes the product hero, staged three-step explanation, validated workflow intake, local structured preview, edit action, and manual-review link to the existing contact form. A single Audit entry is available in desktop/mobile navigation. No external service, database, authentication, payment, or social integration was introduced. See M1 validation and Git handoff below.
 
 ### M2 — AI Audit Engine
 
@@ -62,6 +63,8 @@ Not started. Produce workflow summary, automation feasibility and score, current
 
 Not started. Implement free preview, paid full report, payment flow, Automation Sprint CTA, Retainer CTA, lead capture, and conversion analytics. Payment provider is undecided; do not invent one during M0.
 
+Payment implementation belongs to M5. Verify provider availability for a Bosnia and Herzegovina registered business before selecting a provider. BIMCode application code must never directly store customer payment credentials; raw card data must not pass through BIMCode application servers. No payment SDK is present in M1.
+
 ### M6 — Knowledge-Grounded Recommendations
 
 Not started. Ground recommendations in verified BIMCode capabilities and case studies. Candidate areas: Revit QA, connector inspection, MEP automation, tagging, print automation, AI-assisted model workflows, image/symbol recognition, and Revit family generation.
@@ -73,6 +76,13 @@ Current source supports website descriptions of QA, tagging, sheet/print/export 
 Not started. Generate marketing drafts for meaningful events: `PRODUCT_LAUNCHED`, `MAJOR_FEATURE_SHIPPED`, `CASE_STUDY_PUBLISHED`, `CUSTOMER_RESULT`, `NEW_AUTOMATION_CAPABILITY`, `IMPORTANT_PRODUCT_LEARNING`.
 
 Initial flow: event → draft generated → human approval → publication. Never automatically publish arbitrary Git commits. Keep LinkedIn integration behind an abstraction independent of any specific social API implementation.
+
+Owner-provided future publishing destinations (metadata only, no integration or publication performed):
+
+- LinkedIn: https://www.linkedin.com/in/emin-avdovic-90210/
+- Instagram: https://www.instagram.com/bimcode_solutions_/
+
+Generate platform-specific drafts for meaningful product events, then require human approval before publication.
 
 ### M8 — Analytics and Optimization
 
@@ -124,7 +134,7 @@ At the end of every milestone:
 
 The repository is the source of truth. Commit and push the reviewed handoff before switching machines; on the other machine, inspect local changes before pulling. Documentation left only in an uncommitted working tree is not transferable through Git. Use `git log` to identify the eventual M0 commit; do not invent a future commit hash here.
 
-## Validation and Known Issues
+## M0 Validation History
 
 Validation environment: Windows PowerShell, Node `v24.13.0`, npm `11.6.2`. Initial working tree was clean on `main` at `f58c1ec`.
 
@@ -141,16 +151,57 @@ Early lint/build attempts while installation was incomplete failed because execu
 
 Final local Git state: modified `.gitignore` and `README.md`; untracked `.env.example` and `PROJECT_STATE.md`. Branch remains `main`, HEAD remains `f58c1ec6151fc99ef2b14c21bfccec9bb49f3fa0`. No changes staged, committed, pushed, or deployed. The production build reproduced the tracked output without a Git content diff. M0 is complete as documentation/baseline work despite the explicitly recorded pre-existing lint/test gaps; M1 is not started.
 
-Pre-existing issues and limits:
+## Known Issues and Limits
 
-- No ESLint configuration despite a lint script; no test script/suite.
+- No ESLint configuration despite a lint script. No npm test script or broad regression suite; M1 adds narrowly scoped tests using Node's built-in runner.
 - `src/sections/LogosSection.jsx` imports `partnerLogos`, which is not exported by `src/data/content.js`. It is unused by the current page graph; mounting it would require a fix.
 - Generated `dist/` is tracked. Builds can dirty the working tree; review artifacts separately from source changes.
 - Dependency installation reports deprecated packages, including ESLint 8. No dependency upgrade is included; installation with `--no-audit` is not a security audit.
 - Production deployment settings, contact provider/delivery, and deployed revision remain unverified. Browser interaction and live production behavior are not covered by a build.
 
-## Exact Next Action
+## M1 Architecture and Validation
 
-Finish reviewing and commit/push the M0 documentation and environment baseline to make this handoff available on the second machine. No commit or push is performed implicitly by this milestone.
+Added files:
 
-For the next authorized M1 session: read the handoff files, inspect Git status/log, install and reproduce the validation baseline, then implement `/audit` in `src/App.jsx` with a dedicated landing page and workflow intake UI using the existing layout/styles. Define intake validation and a local non-AI submission/preview state. Keep existing consultation/contact behavior intact. Do not add an AI API call, invent a model identifier, or begin payments. M1 implementation must wait for its own task.
+- `src/pages/AuditPage.jsx`: landing page, grouped accessible form, local summary, edit and manual-review CTA.
+- `src/features/audit/workflow.js`: options, length limits, validation, normalized JSDoc model, frequency display helper.
+- `src/features/audit/workflow.test.js`: four Node test cases covering normalization, required/invalid inputs, numeric bounds, and custom frequency semantics.
+
+Modified source/docs: `src/App.jsx` (adds `/audit`), `src/components/Header.jsx` (one Audit navigation entry; wrapped navigation below the large breakpoint to fit tablet widths), `README.md`, and `PROJECT_STATE.md`. Existing forms, pages, global styles, dependency manifests/lockfile, and Vercel configuration are unchanged.
+
+The existing tracked-output policy is retained. Build output updates `dist/index.html`, replaces `dist/assets/index-CCf3uH34.css` and `dist/assets/index-bQnARIPK.js` with the current generated CSS/JS. These are generated M1 changes, not hand-edited artifacts.
+
+Decisions:
+
+- React component state owns the draft and normalized preview; no localStorage, network submission, analytics, or persistence for intake data. Refresh/navigation clears it. Editing preserves the draft during the current page visit.
+- Versioned object: `schemaVersion: 1`, `contact` (name/email/company/role), `workflow` (title/description/discipline/software/Revit version/frequency/manual effort/participants/pain point/desired outcome). Strings are trimmed; empty Revit version becomes null; software is allowlisted and deduplicated; numeric strings become numbers. No unrecognized fields are copied.
+- Frequency uses daily/weekly/monthly/per project/custom plus positive integer occurrences. Custom requires an explicit interval in days; other types normalize intervalDays to null. No automatic annualization assumptions.
+- Manual effort is a positive finite duration in hours/minutes, explicitly per person per occurrence. Participants are positive integers. Counts are capped at 10,000, custom intervals at 3,650 days, duration at 1,000 hours or 60,000 minutes; text fields have explicit limits.
+- Field errors are associated with inputs, the first invalid field receives focus, and preview/edit transitions move focus to the relevant heading. Required work email uses basic format validation, not an invented company-domain restriction.
+- Preview copy states that no AI analysis was generated or data sent. Manual review opens `/?inquiry=audit#contact` and explains that details are not transferred. Contact implementation stays unchanged.
+- No new runtime dependencies. Temporary Playwright tooling used the installed Edge browser outside the repository; model tests use built-in Node tooling. Client validation is not a future server security boundary.
+
+Validation on 2026-09-12:
+
+| Check | Result |
+| --- | --- |
+| Baseline build before M0 commit | Passed, 1,519 modules; M0-only diff verified. |
+| M1 production build | Passed, 1,521 modules; existing browser-data warnings remain. |
+| Model tests | `node --test src/features/audit/workflow.test.js`: 4 passed, 0 failed. |
+| Lint | `npm run lint`: same pre-existing missing ESLint configuration failure. |
+| Routes in real browser | Local production preview: `/`, `/products` → `/solutions`, `/case-study`, `/blog`, `/#contact`, `/audit` passed. `/contact` retains its existing not-found behavior. |
+| Intake and summary | Required fields, invalid email, zero duration, fractional participants, missing custom period rejected. Valid custom frequency, software selection, preview, keyboard focus, and edit retention passed. |
+| Responsive / theme | Edge checks at 360, 390, 768, 1024, and 1440px passed with no horizontal overflow and visible Audit navigation. Screenshots captured; mobile page visually inspected. Dark mode passed. |
+| Contact / privacy | Manual-review CTA opens existing contact with audit selected. Return to Audit clears inputs. Zero POST requests and zero uncaught page errors in the browser checks. No external submission performed. |
+| Direct routing | Direct local `/audit` navigation passed; unchanged Vercel catch-all SPA rewrite covers `/audit`. Live Vercel deployment was not tested. |
+| Scope / secrets | Final diff reviewed, `git diff --check` passed; no credentials or new environment variables added. |
+
+No M1 blocker found. Live production/contact delivery remains outside this validation. Local browser-check scripts/screenshots are temporary verification artifacts, not required runtime dependencies or canonical handoff files.
+
+## Current Git Handoff and Exact Next Action
+
+Branch: `main`. HEAD/M0 commit: `4f279634a871ba2cab7dcc282be750e45e645774`, pushed to `origin/main`. M1 has no commit: source/docs and regenerated `dist/` changes are unstaged; the new Audit page/model/tests and hashed build assets are untracked. M0 and M1 remain separate. No M1 push or deployment was performed.
+
+Next action: browser-review `/audit` using `npm run preview` after a build, then commit/push M1 only when explicitly authorized. Transfer the reviewed M1 work through Git before switching machines.
+
+For the next authorized M2 task: read repository instructions and state, reproduce tests/build and the known lint baseline, then verify the exact production OpenAI/Astra API model identifier and supported API interface. Select a secure server execution boundary compatible with the verified hosting setup, define request/response schemas using the normalized intake, add server input/output validation and production rate limiting, and keep credentials server-side. Objective: secure server-side OpenAI/Astra integration with schema-validated structured output. Do not infer the model identifier from the developer's display name, and do not introduce M5 payments.

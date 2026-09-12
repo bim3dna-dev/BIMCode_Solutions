@@ -6,6 +6,7 @@ import logoPng from "../assets/Logo BIMCode Solutions 4 Final.png";
 const navItems = [
   { label: "Home", to: "/" },
   { label: "Solutions", to: "/solutions" },
+  { label: "AI Audit", to: "/audit" },
   { label: "Case Study", to: "/case-study" },
   { label: "About", to: "/#about" },
   { label: "Contact", to: "/#contact" },
@@ -42,7 +43,7 @@ export default function Header() {
               </div>
             </div>
           </NavLink>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex dark:text-slate-300">
+          <nav className="hidden items-center gap-2 text-sm font-medium text-slate-600 lg:flex dark:text-slate-300">
             {navItems.map((item) =>
               item.to.startsWith("/#") ? (
                 <a
@@ -74,7 +75,7 @@ export default function Header() {
             <ThemeToggle />
           </div>
         </div>
-        <nav className="mt-4 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600 md:hidden dark:text-slate-300">
+        <nav className="mt-4 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600 lg:hidden dark:text-slate-300">
           {navItems.map((item) =>
             item.to.startsWith("/#") ? (
               <a
