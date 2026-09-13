@@ -2,15 +2,15 @@
 
 ## Metadata
 
-- Last updated: 2026-09-12 (Europe/Sarajevo).
-- Current branch: `preview/audit-astra`.
+- Last updated: 2026-09-13 (Europe/Sarajevo).
+- Current branch: `main`.
 - Latest relevant commit / M1 checkpoint: `fe2b496dd89fc0e12579e469debd961e1dd83430` — Milestone M1 complete... . Already existed at session start; `git push origin main` succeeded with `Everything up-to-date` on 2026-09-12. No duplicate commit or history rewrite.
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
 - Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; local live provider validation has passed; Preview, deployed routing verification, and distributed rate limiting remain activation requirements.
 - Prior committed checkpoint: `96871e1` (M2.1 local preparation). This local validation checkpoint follows it with `chore: prepare Astra audit production activation`; resolve its hash with `git log -1`.
-- Active next step: M2.1 ? Production Activation and Live Astra Validation; local live and Preview validation complete; Production activation pending. Production remains disabled.
+- Active next step: M2.2 Production Activation Preparation; ready for manual Production configuration. M3 not started.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -398,3 +398,18 @@ HTTP 429 now displays "You've reached the analysis limit. Please wait a few minu
 Production remains disabled. M3 has not started. Before Production activation: record the exact tested origin, confirm Production origin/environment and WAF alias coverage, close the remaining cost/error/secret-isolation checklist items, and obtain explicit enablement authorization. Preview evidence alone is not authorization to enable Production.
 
 Closure checks: 20 offline tests PASS; production build PASS (existing dependency warnings); Vercel routing normalization and API exclusions PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local remains ignored and untracked; its contents were not read. Checkpoint: `chore: close Astra preview validation` on `preview/audit-astra`.
+
+
+## M2.2 Production Activation Preparation
+
+Status: **READY FOR PRODUCTION CONFIG**. M2.1 Preview: **COMPLETE**. Production activation: **PENDING**; M3 not started.
+
+Preview delta reviewed before integration: `cc690eb` (documentation blank line to trigger Preview) and `7999d2b` (429 UX helper/tests, PROJECT_STATE, AUDIT_BACKEND, tracked generated assets). No unrelated changes. Fetched origin; main was current at `86180f4`. Fast-forward integration landed at `7999d2bf6b46f4a4595e7fb7d3198dc3be25c041`, preserving history without conflicts. `preview/audit-astra` is retained until Production verification. This preparation documentation is a separate follow-up commit; use `git log -1` for its final hash.
+
+Canonical origin: **VERIFIED** by read-only HEAD requests on 2026-09-13 at 09:43 UTC. Apex HTTPS returns 308 to `https://www.bimcodesolutions.com/`; www returns 200 HTML. Current single-origin API configuration should use `https://www.bimcodesolutions.com`, without trailing slash. No origin/CORS code or WAF behavior changed.
+
+Production environment: **PENDING**, developer configures privately. Production deployment after configuration: **PENDING/unverified**; a main push may trigger hosting automation, not prove activation. Production smoke test/OpenAI/usage/client isolation/contact check: **PENDING**, not performed. Production WAF scope/enforcement: **PENDING**; Preview rule is configured and verified. Exact Preview hostname remains unrecorded. No secret values inspected or stored; .env.local remains ignored/untracked.
+
+Exact remaining action: follow docs/AUDIT_BACKEND.md M2.2 manual steps to configure Production-only variables, deliberately enable and redeploy, submit one synthetic workflow, verify HTTP 200/rendering/safe usage/client isolation/Production WAF/contact behavior, and record evidence. Prefer WAF configuration/log verification over unnecessary paid calls. Do not mark M2.2 COMPLETE before real Production validation.
+
+M2.2 validation: before integration and again on integrated main, all 20 offline tests PASS, production build PASS (existing dependency warnings), routing normalization/API exclusion PASS, git diff --check PASS, and repository/generated-asset secret-pattern scan PASS. No local env file is tracked; .env.local ignore rule verified. Only the two operations documents changed after integration.

@@ -191,3 +191,48 @@ HTTP 429 now displays "You've reached the analysis limit. Please wait a few minu
 Production remains disabled. M3 has not started. Before Production activation: record the exact tested origin, confirm Production origin/environment and WAF alias coverage, close the remaining cost/error/secret-isolation checklist items, and obtain explicit enablement authorization. Preview evidence alone is not authorization to enable Production.
 
 Closure checks: 20 offline tests PASS; production build PASS (existing dependency warnings); Vercel routing normalization and API exclusions PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local remains ignored and untracked; its contents were not read. Checkpoint: `chore: close Astra preview validation` on `preview/audit-astra`.
+
+
+## M2.2 Production activation preparation (2026-09-13)
+
+Status: **READY FOR PRODUCTION CONFIG**, not activated. Preview checkpoint `7999d2bf6b46f4a4595e7fb7d3198dc3be25c041` was fast-forwarded into main without conflicts or history rewrite. Preview branch is retained. No secret, enablement gate, origin code, or WAF setting was changed.
+
+Canonical origin verified by read-only HTTPS HEAD checks at 09:43 UTC: `https://bimcodesolutions.com/` returns **308**, Location `https://www.bimcodesolutions.com/`; www returns **200 HTML**. Thus the observed canonical application origin is `https://www.bimcodesolutions.com`. Recheck `/audit` redirects in the browser at activation. If both origins later independently serve the app, restore a canonical redirect or review the single-origin design before activation; never allow arbitrary origins. The static HTML response's CORS headers do not change the API's exact-origin guard.
+
+### Manual Production configuration and smoke test
+
+The developer performs these steps in Vercel; Codex has not configured or inspected secret values.
+
+1. Open the intended Vercel project and confirm main is its Production branch. Check that `rate-limit-audit-analysis` covers the Production hostname before enabling paid requests.
+2. Open Settings > Environment Variables. Select **Production only** for each variable below.
+3. Privately add `OPENAI_API_KEY` using the authorized server key. Never copy it to source, documentation, browser code, or chat.
+4. Add `OPENAI_MODEL=gpt-6-astra`.
+5. At the deliberate manual activation step, add `AUDIT_ANALYSIS_ENABLED=true`. Until then leave it false/unset.
+6. Add `AUDIT_ALLOWED_ORIGIN=https://www.bimcodesolutions.com`, using the verified canonical origin, no trailing slash.
+7. Redeploy Production **after** the variables are configured. Confirm deployment commit/runtime and completion. A main push may deploy automatically, but a deployment made before configuration does not prove activation. Missing enablement/key/origin still fails closed with controlled 503.
+8. Open `https://www.bimcodesolutions.com/audit`; check the apex redirects to the same origin.
+9. Submit exactly one synthetic workflow using the data below. Confirm HTTP 200, rendered Astra assessment, and a single normal function invocation.
+10. Check safe usage metadata (model, input/cached/output/reasoning/total tokens), with no workflow, key, or raw exception logged. Inspect served assets and browser network payloads for secret exposure without copying secrets into reports.
+11. Verify the active Production WAF rule and its hostname scope/events: POST `/api/audit/analyze`, Fixed Window, 3 requests / 600 seconds, IP Address, Too Many Requests (429). Prefer rule/audit-log evidence after the one success; do not burn additional calls merely to reproduce Preview evidence. If an actual 429 test is needed, each allowed request incurs model cost; confirm the blocked request produces no normal Astra invocation.
+12. Confirm the contact form still renders, validates, and retains its existing endpoint or email fallback. Verify delivery only with an explicitly authorized synthetic contact submission.
+13. Record deployment ID/commit, time, canonical origin, HTTP/result/usage outcome, WAF evidence, client isolation, and contact outcome. Mark activation COMPLETE only after the real Production endpoint passes. On failure, set enablement false and redeploy; do not weaken the gates.
+
+Synthetic input: name `Production Test User`; email `test@example.com`; company `BIMCode Production Test`; role `BIM Manager`; discipline `Mechanical`; title `Weekly MEP QA review`; software Revit, version `2025`; weekly, 1 occurrence; manual effort 3 hours per person per occurrence; participants 6. Description: A 6-person MEP team manually checks a Revit piping model every Friday for disconnected fittings, incorrect system classifications, missing insulation parameters, and untagged vertical pipes. Desired outcome: Automate deterministic QA checks and produce a consistent issue report. No real customer information.
+
+### Activation evidence checklist
+
+- [x] Local live Astra, strict schema, and architecture gate passed.
+- [x] Preview end-to-end, distributed WAF enforcement, and 429 behavior passed (owner evidence).
+- [x] Dedicated 429 UX and deterministic tests implemented.
+- [x] No client-side secret exposure observed in validated Preview (owner checklist); local scan passed.
+- [x] Canonical www origin confirmed by apex 308 and www 200.
+- [ ] Exact stable Preview hostname recorded (not supplied; no alias invented).
+- [ ] Production-only server variables configured by developer.
+- [ ] Production deployment generated after variables exist.
+- [ ] Production `/audit`, real OpenAI request, and rendered result pass.
+- [ ] Production usage log safe; no secret in browser/network payload.
+- [ ] Production WAF enforcement/scope verified.
+- [ ] Contact form regression check passes.
+- [ ] Explicit manual Production activation completed and recorded.
+
+Production environment configuration, resulting deployment, paid smoke test, usage logs, and Production WAF are **PENDING/unverified**. No live model request or contact submission was made during preparation. M3 remains unstarted.
