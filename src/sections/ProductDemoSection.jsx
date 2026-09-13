@@ -1,3 +1,4 @@
+import { useLocale } from "../i18n/LocaleProvider.jsx";
 import { Link } from "react-router-dom";
 
 const demo = {
@@ -11,18 +12,19 @@ const demo = {
 };
 
 export default function ProductDemoSection() {
+  const { t } = useLocale();
   return (
     <section id="demo" className="light-section py-24">
       <div className="section-container grid gap-10 lg:grid-cols-[1.2fr,0.8fr]">
         <div className="space-y-4">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-brand-500 dark:text-brand-300">
-            Workflow Demo
+            {t("Workflow Demo")}
           </p>
           <h2 className="text-3xl font-semibold text-slate-900 dark:text-white">
-            {demo.title}
+            {t(demo.title)}
           </h2>
           <p className="text-base text-slate-600 dark:text-slate-300">
-            {demo.description}
+            {t(demo.description)}
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
             {demo.tags.map((tag) => (
@@ -30,7 +32,7 @@ export default function ProductDemoSection() {
                 key={tag}
                 className="rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-700"
               >
-                {tag}
+                {t(tag)}
               </span>
             ))}
           </div>
@@ -39,7 +41,7 @@ export default function ProductDemoSection() {
           <iframe
             className="aspect-video w-full border-0"
             src={`https://www.youtube-nocookie.com/embed/${demo.youtubeId}`}
-            title={demo.videoTitle}
+            title={t(demo.videoTitle)}
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
             allow="encrypted-media; picture-in-picture; fullscreen"
@@ -50,7 +52,7 @@ export default function ProductDemoSection() {
               to="/audit"
               className="btn-primary inline-flex px-6 py-3 text-sm font-semibold"
             >
-              Analyze Your Workflow
+              {t("Analyze Your Workflow")}
             </Link>
           </div>
         </div>

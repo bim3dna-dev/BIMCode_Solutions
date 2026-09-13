@@ -90,3 +90,14 @@ After an authorized deployment, check direct route loads/refreshes, the `/produc
 - Never commit secrets or expose API keys client-side. Future AI integration needs a server boundary.
 - Validate before committing: configured tests if present, lint, production build, and diff review. Record existing failures explicitly.
 - Update `PROJECT_STATE.md` after meaningful milestones with decisions, validation, defects, Git state, and the exact next action.
+
+
+## Site languages and social links
+
+M2.3 uses a small React LocaleProvider with static English, Netherlands Dutch, German, and Bosnian copy in `src/i18n/translations.js`. Components translate only presentation text via `useLocale().t`; missing strings fall back to their English source. Add each new public string to all locale columns. No runtime translation service or additional i18n dependency is used.
+
+English is the first-visit default. The header's native language select persists `en`, `nl`, `de`, or `bs` under `bimcode_locale` in localStorage and updates the document language. Blocked storage falls back safely to in-memory selection. Routes are unchanged; About and Contact remain `/#about` and `/#contact`. Locale-prefixed SEO routes/hreflang are a future consideration.
+
+Audit labels, options, explanatory text, and errors are localized at display time. Canonical enum values, payload normalization, and the backend remain unchanged. User-entered content and generated Astra prose are not translated; non-English UI includes an English-assessment note. Multilingual AI output is deferred. Native browser validation UI follows browser settings.
+
+Footer destinations live in `src/data/social-links.js`. LinkedIn, X, Instagram, and the owner-supplied XING destination open in new tabs with accessible labels. YouTube is omitted until a verified public channel URL is supplied; the existing homepage video is not a channel URL. Social posting remains manual/approval-based until M7.

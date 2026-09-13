@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:api": "node --env-file-if-exists=.env.local scripts/dev-api.js",
-    "test": "node --test src/features/audit/*.test.js server/audit/*.test.js",
+    "test": "node --test src/features/audit/*.test.js src/i18n/*.test.js server/audit/*.test.js",
     "test:live": "node --env-file-if-exists=.env.local scripts/check-audit-live.js",
     "build": "vite build",
     "preview": "vite preview",

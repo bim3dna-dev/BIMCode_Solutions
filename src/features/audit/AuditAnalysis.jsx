@@ -1,3 +1,4 @@
+import { useLocale } from "../../i18n/LocaleProvider.jsx";
 import { useEffect, useRef, useState } from "react";
 import { auditResultSchema } from "../../../shared/audit-result.js";
 
@@ -11,6 +12,7 @@ const engagementLabels = {
 };
 
 export default function AuditAnalysis({ submission, onBusyChange }) {
+  const { t, locale } = useLocale();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -65,22 +67,25 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
       className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-800"
       aria-busy={busy}
     >
+      {locale !== "en" && (
+        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+          {t("AI assessment is currently generated in English.")}
+        </p>
+      )}
       {!result ? (
         <>
           <h3 className="text-xl font-semibold">
-            Get an automation assessment
+            {t("Get an automation assessment")}
           </h3>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Analyze this workflow for technical feasibility, possible
-            approaches, risks, and unknowns. This is a first-pass assessment,
-            not a guarantee or an ROI calculation.
+            {t(
+              "Analyze this workflow for technical feasibility, possible approaches, risks, and unknowns. This is a first-pass assessment, not a guarantee or an ROI calculation.",
+            )}
           </p>
           <p className="mt-3 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
-            Choosing Analyze Workflow sends your intake to BIMCode's analysis
-            endpoint. Your name, email, company, and role are excluded from the
-            OpenAI request. Workflow text is sent to OpenAI for analysis, so
-            remove confidential or personal information from it first. This does
-            not submit a lead or email anyone.
+            {t(
+              "Choosing Analyze Workflow sends your intake to BIMCode's analysis endpoint. Your name, email, company, and role are excluded from the OpenAI request. Workflow text is sent to OpenAI for analysis, so remove confidential or personal information from it first. This does not submit a lead or email anyone.",
+            )}
           </p>
           <button
             type="button"
@@ -88,14 +93,14 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
             disabled={busy}
             className="btn-primary mt-5 px-6 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {busy ? "Analyzing workflow…" : "Analyze Workflow"}
+            {busy ? t("Analyzing workflow…") : t("Analyze Workflow")}
           </button>
           {busy && (
             <p
               role="status"
               className="mt-3 text-sm text-slate-600 dark:text-slate-300"
             >
-              Reviewing your workflow. This can take up to a minute.
+              {t("Reviewing your workflow. This can take up to a minute.")}
             </p>
           )}
           {error && (
@@ -103,7 +108,7 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
               role="alert"
               className="mt-3 text-sm text-red-700 dark:text-red-300"
             >
-              {error}
+              {t(error)}
             </p>
           )}
         </>
@@ -114,36 +119,37 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
             tabIndex={-1}
             className="scroll-mt-48 text-2xl font-semibold focus:outline-none"
           >
-            Your automation assessment
+            {t("Your automation assessment")}
           </h3>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            AI-generated first-pass assessment based on your inputs. Feasibility
-            and the score are estimates, not guarantees or probabilities. No
-            financial ROI has been calculated. A technical review is needed
-            before implementation.
+            {t(
+              "AI-generated first-pass assessment based on your inputs. Feasibility and the score are estimates, not guarantees or probabilities. No financial ROI has been calculated. A technical review is needed before implementation.",
+            )}
           </p>
           <p className="mt-5 whitespace-pre-wrap break-words leading-relaxed">
-            {result.summary}
+            <span lang="en">{result.summary}</span>
           </p>
           <div className="mt-6 rounded-2xl border border-slate-200 p-5 dark:border-slate-700">
             <h4 className="text-lg font-semibold">
-              Automation feasibility:{" "}
+              {t("Automation feasibility:")}{" "}
               <span className="capitalize">
                 {result.automationFeasibility.level}
               </span>{" "}
               · {result.automationFeasibility.score}/100
             </h4>
             <p className="mt-3 whitespace-pre-wrap break-words">
-              {result.automationFeasibility.rationale}
+              <span lang="en">{result.automationFeasibility.rationale}</span>
             </p>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-              Category: {result.workflowClassification.category} · Determinism:{" "}
-              {result.workflowClassification.determinism} · Repetition:{" "}
+              {t("Category:")}{" "}
+              <span lang="en">{result.workflowClassification.category}</span>
+              {t("· Determinism:")} {result.workflowClassification.determinism}{" "}
+              {t("· Repetition:")}{" "}
               {result.workflowClassification.repetitionLevel}
             </p>
           </div>
           <h4 className="mt-8 text-xl font-semibold">
-            Automation opportunities
+            {t("Automation opportunities")}
           </h4>
           <ul className="mt-4 grid gap-4 sm:grid-cols-2">
             {result.automationOpportunities.map((item, index) => (
@@ -151,23 +157,29 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
                 key={index}
                 className="min-w-0 rounded-2xl border border-slate-200 p-5 dark:border-slate-700"
               >
-                <h5 className="break-words font-semibold">{item.task}</h5>
+                <h5 className="break-words font-semibold">
+                  <span lang="en">{item.task}</span>
+                </h5>
                 <p className="mt-2 whitespace-pre-wrap break-words">
-                  {item.approach}
+                  <span lang="en">{item.approach}</span>
                 </p>
                 <p className="mt-3 break-words text-sm text-slate-600 dark:text-slate-300">
-                  {item.technology} · Confidence: {item.confidence}
+                  <span lang="en">{item.technology}</span> {t("· Confidence:")}{" "}
+                  {item.confidence}
                 </p>
               </li>
             ))}
           </ul>
           {!result.automationOpportunities.length && (
             <p className="mt-3">
-              No suitable automation opportunity was identified from these
-              inputs.
+              {t(
+                "No suitable automation opportunity was identified from these inputs.",
+              )}
             </p>
           )}
-          <h4 className="mt-8 text-xl font-semibold">Technical approach</h4>
+          <h4 className="mt-8 text-xl font-semibold">
+            {t("Technical approach")}
+          </h4>
           <dl className="mt-4 space-y-4">
             {[
               ["Primary approach", "recommendedPrimaryApproach"],
@@ -177,51 +189,59 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
               ["External processing", "externalProcessingRole"],
             ].map(([label, key]) => (
               <div key={key}>
-                <dt className="font-semibold">{label}</dt>
+                <dt className="font-semibold">{t(label)}</dt>
                 <dd className="mt-1 whitespace-pre-wrap break-words text-slate-600 dark:text-slate-300">
-                  {result.technicalArchitecture[key]}
+                  <span lang="en">{result.technicalArchitecture[key]}</span>
                 </dd>
               </div>
             ))}
           </dl>
-          <h4 className="mt-8 text-xl font-semibold">Risks and mitigations</h4>
+          <h4 className="mt-8 text-xl font-semibold">
+            {t("Risks and mitigations")}
+          </h4>
           <ul className="mt-4 space-y-4">
             {result.risks.map((item, index) => (
               <li key={index} className="break-words">
                 <p className="font-semibold">
-                  {item.risk} · Severity: {item.severity}
+                  <span lang="en">{item.risk}</span> {t("· Severity:")}{" "}
+                  {item.severity}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-slate-600 dark:text-slate-300">
-                  {item.mitigation}
+                  <span lang="en">{item.mitigation}</span>
                 </p>
               </li>
             ))}
           </ul>
           {!result.risks.length && (
             <p className="mt-3">
-              No specific risks were identified; this does not mean the workflow
-              is risk-free.
+              {t(
+                "No specific risks were identified; this does not mean the workflow is risk-free.",
+              )}
             </p>
           )}
-          <h4 className="mt-8 text-xl font-semibold">Unknowns to resolve</h4>
+          <h4 className="mt-8 text-xl font-semibold">
+            {t("Unknowns to resolve")}
+          </h4>
           <ul className="mt-4 list-inside list-disc space-y-2">
             {result.questionsOrUnknowns.map((question, index) => (
               <li key={index} className="break-words">
-                {question}
+                <span lang="en">{question}</span>
               </li>
             ))}
           </ul>
           {!result.questionsOrUnknowns.length && (
             <p className="mt-3">
-              No further unknowns were identified in this first pass.
+              {t("No further unknowns were identified in this first pass.")}
             </p>
           )}
-          <h4 className="mt-8 text-xl font-semibold">Recommended engagement</h4>
+          <h4 className="mt-8 text-xl font-semibold">
+            {t("Recommended engagement")}
+          </h4>
           <p className="mt-3 font-semibold">
-            {engagementLabels[result.recommendedEngagement.type]}
+            {t(engagementLabels[result.recommendedEngagement.type])}
           </p>
           <p className="mt-2 whitespace-pre-wrap break-words text-slate-600 dark:text-slate-300">
-            {result.recommendedEngagement.rationale}
+            <span lang="en">{result.recommendedEngagement.rationale}</span>
           </p>
         </>
       )}

@@ -1,5 +1,7 @@
+import { useLocale } from "../i18n/LocaleProvider.jsx";
 import { NavLink, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import LanguageSelector from "./LanguageSelector.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 import logoPng from "../assets/Logo BIMCode Solutions 4 Final.png";
 
@@ -13,6 +15,7 @@ const navItems = [
 ];
 
 export default function Header() {
+  const { t } = useLocale();
   const location = useLocation();
 
   useEffect(() => {
@@ -31,19 +34,22 @@ export default function Header() {
           <NavLink to="/" className="flex items-center gap-3">
             <img
               src={logoPng}
-              alt="BIMCode Solutions logo"
+              alt={t("BIMCode Solutions logo")}
               className="h-10 w-10 rounded-xl border border-slate-200 shadow-sm dark:border-slate-700"
             />
             <div className="leading-tight text-sm font-semibold tracking-[0.08em] text-slate-700 dark:text-slate-200">
               <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                BIMCode <span className="font-semibold text-slate-600 dark:text-slate-300">Solutions</span>
+                BIMCode{" "}
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Solutions
+                </span>
               </span>
               <div className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
-                Revit + Python + AI automation
+                {t("Revit + Python + AI automation")}
               </div>
             </div>
           </NavLink>
-          <nav className="hidden items-center gap-2 text-sm font-medium text-slate-600 lg:flex dark:text-slate-300">
+          <nav className="hidden items-center gap-2 text-sm font-medium text-slate-600 xl:flex dark:text-slate-300">
             {navItems.map((item) =>
               item.to.startsWith("/#") ? (
                 <a
@@ -51,7 +57,7 @@ export default function Header() {
                   href={item.to}
                   className="px-3 py-2 transition hover:text-[#4f6a7d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:hover:text-[#9bb6c9]"
                 >
-                  {item.label}
+                  {t(item.label)}
                 </a>
               ) : (
                 <NavLink
@@ -66,16 +72,19 @@ export default function Header() {
                     ].join(" ")
                   }
                 >
-                  {item.label}
+                  {t(item.label)}
                 </NavLink>
               ),
             )}
           </nav>
           <div className="flex items-center gap-3">
+            <div className="hidden xl:block">
+              <LanguageSelector id="language-desktop" />
+            </div>
             <ThemeToggle />
           </div>
         </div>
-        <nav className="mt-4 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600 lg:hidden dark:text-slate-300">
+        <nav className="mt-4 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600 xl:hidden dark:text-slate-300">
           {navItems.map((item) =>
             item.to.startsWith("/#") ? (
               <a
@@ -83,7 +92,7 @@ export default function Header() {
                 href={item.to}
                 className="px-2 py-2 transition hover:text-[#4f6a7d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:hover:text-[#9bb6c9]"
               >
-                {item.label}
+                {t(item.label)}
               </a>
             ) : (
               <NavLink
@@ -98,10 +107,11 @@ export default function Header() {
                   ].join(" ")
                 }
               >
-                {item.label}
+                {t(item.label)}
               </NavLink>
             ),
           )}
+          <LanguageSelector id="language-mobile" />
         </nav>
       </div>
     </header>

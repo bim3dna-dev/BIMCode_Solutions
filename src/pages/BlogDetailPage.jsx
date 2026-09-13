@@ -1,7 +1,9 @@
+import { useLocale } from "../i18n/LocaleProvider.jsx";
 import { Navigate, useParams } from "react-router-dom";
 import { blogPosts } from "../data/content.js";
 
 export default function BlogDetailPage() {
+  const { t } = useLocale();
   const { slug } = useParams();
   const post = blogPosts.find((p) => p.slug === slug);
 
@@ -13,17 +15,19 @@ export default function BlogDetailPage() {
     <section className="bg-white py-16 dark:bg-slate-950">
       <div className="section-container space-y-6">
         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-brand-500 dark:text-brand-300">
-          {post.tag} / {post.time}
+          {t(post.tag)} / {t(post.time)}
         </p>
         <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-          {post.title}
+          {t(post.title)}
         </h1>
         {post.hook && (
-          <p className="text-base text-slate-600 dark:text-slate-300">{post.hook}</p>
+          <p className="text-base text-slate-600 dark:text-slate-300">
+            {t(post.hook)}
+          </p>
         )}
         <div className="space-y-4 text-base leading-relaxed text-slate-700 dark:text-slate-200">
           {post.body?.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
+            <p key={paragraph}>{t(paragraph)}</p>
           ))}
         </div>
       </div>

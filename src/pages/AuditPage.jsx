@@ -1,9 +1,10 @@
+import { localizedFrequency } from "../i18n/locale.js";
+import { useLocale } from "../i18n/LocaleProvider.jsx";
 import AuditAnalysis from "../features/audit/AuditAnalysis.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   createInitialIntake,
-  describeFrequency,
   disciplines,
   frequencyOptions,
   normalizeIntake,
@@ -19,18 +20,19 @@ const cardClass =
   "rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800/70 dark:bg-slate-950";
 
 function Field({ name, label, errors, children, hint, required = false }) {
+  const { t } = useLocale();
   return (
     <div className="min-w-0">
       <label htmlFor={`audit-${name}`} className={labelClass}>
-        {label}
-        {required ? " *" : " (optional)"}
+        {t(label)}
+        {required ? t(" *") : t(" (optional)")}
       </label>
       {hint && (
         <p
           id={`audit-${name}-hint`}
           className="mt-1 text-sm text-slate-500 dark:text-slate-400"
         >
-          {hint}
+          {t(hint)}
         </p>
       )}
       {children}
@@ -39,7 +41,7 @@ function Field({ name, label, errors, children, hint, required = false }) {
           id={`audit-${name}-error`}
           className="mt-2 text-sm text-red-700 dark:text-red-300"
         >
-          {errors[name]}
+          {t(errors[name])}
         </p>
       )}
     </div>
@@ -47,6 +49,7 @@ function Field({ name, label, errors, children, hint, required = false }) {
 }
 
 export default function AuditPage() {
+  const { t } = useLocale();
   const [form, setForm] = useState(createInitialIntake);
   const [errors, setErrors] = useState({});
   const [submission, setSubmission] = useState(null);
@@ -132,35 +135,35 @@ export default function AuditPage() {
       <section className="light-section py-16 sm:py-20">
         <div className="section-container relative">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-500 dark:text-brand-300">
-            BIMCode AI Automation Audit
+            {t("BIMCode AI Automation Audit")}
           </p>
           <h1 className="mt-4 max-w-4xl text-3xl font-semibold leading-tight sm:text-5xl">
-            Find out what your BIM workflow is costing you — and whether it
-            should be automated.
+            {t(
+              "Find out what your BIM workflow is costing you — and whether it should be automated.",
+            )}
           </h1>
           <p className="mt-6 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            Start with the work your team repeats. BIMCode reviews BIM/Revit
-            workflows for automation potential, time consumed, technical
-            feasibility, potential savings, and suitable implementation
-            approaches.
+            {t(
+              "Start with the work your team repeats. BIMCode reviews BIM/Revit workflows for automation potential, time consumed, technical feasibility, potential savings, and suitable implementation approaches.",
+            )}
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Describe your workflow, review your inputs, and request an
-            assessment; technical analysis identifies opportunities and
-            unknowns. Savings depend on your workflow and its constraints.
+            {t(
+              "Describe your workflow, review your inputs, and request an assessment; technical analysis identifies opportunities and unknowns. Savings depend on your workflow and its constraints.",
+            )}
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
               href={submission ? "#audit-summary" : "#audit-intake"}
               className="btn-primary inline-flex px-6 py-3 text-sm font-semibold"
             >
-              Analyze My Workflow
+              {t("Analyze My Workflow")}
             </a>
             <a
               href="#audit-how-it-works"
               className="btn-ghost inline-flex px-6 py-3 text-sm font-semibold"
             >
-              How it works
+              {t("How it works")}
             </a>
           </div>
         </div>
@@ -171,12 +174,12 @@ export default function AuditPage() {
         className="section-container scroll-mt-48 py-12"
       >
         <h2 className="text-2xl font-semibold">
-          A practical path from repetitive work to a plan
+          {t("A practical path from repetitive work to a plan")}
         </h2>
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-          Describe the work, request an initial technical assessment, and review
-          possible approaches. Numerical ROI reports are planned; manual review
-          is available.
+          {t(
+            "Describe the work, request an initial technical assessment, and review possible approaches. Numerical ROI reports are planned; manual review is available.",
+          )}
         </p>
         <ol className="mt-6 grid gap-5 md:grid-cols-3">
           {[
@@ -197,9 +200,9 @@ export default function AuditPage() {
               <p className="text-sm font-semibold text-brand-500 dark:text-brand-300">
                 0{index + 1}
               </p>
-              <h3 className="mt-3 text-lg font-semibold">{title}</h3>
+              <h3 className="mt-3 text-lg font-semibold">{t(title)}</h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {description}
+                {t(description)}
               </p>
             </li>
           ))}
@@ -213,49 +216,57 @@ export default function AuditPage() {
         {submission ? (
           <div className={cardClass}>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-500 dark:text-brand-300">
-              Workflow preview
+              {t("Workflow preview")}
             </p>
             <h2
               ref={resultHeading}
               tabIndex={-1}
               className="mt-3 scroll-mt-48 text-2xl font-semibold focus:outline-none"
             >
-              Review your workflow
+              {t("Review your workflow")}
             </h2>
             <p
               role="status"
               className="mt-3 text-slate-600 dark:text-slate-300"
             >
-              Review your inputs below, then choose Analyze Workflow to request
-              an assessment. Editing returns to the form and clears the
-              assessment.
+              {t(
+                "Review your inputs below, then choose Analyze Workflow to request an assessment. Editing returns to the form and clears the assessment.",
+              )}
             </p>
             <dl className="mt-8 grid gap-6 sm:grid-cols-2">
               {[
                 ["Workflow", submission.workflow.title],
-                ["Discipline", submission.workflow.discipline],
+                ["Discipline", t(submission.workflow.discipline)],
                 ["Description", submission.workflow.description],
-                ["Frequency", describeFrequency(submission.workflow.frequency)],
+                [
+                  "Frequency",
+                  localizedFrequency(submission.workflow.frequency, t),
+                ],
                 [
                   "Manual effort",
-                  `${submission.workflow.manualEffort.duration} ${submission.workflow.manualEffort.unit} per person, per occurrence`,
+                  t("{duration} {unit} per person, per occurrence", {
+                    duration: submission.workflow.manualEffort.duration,
+                    unit: t(submission.workflow.manualEffort.unit),
+                  }),
                 ],
                 ["Participants", submission.workflow.participants],
                 [
                   "Software / tools",
-                  submission.workflow.software.join(", ") || "Not specified",
+                  submission.workflow.software
+                    .map((tool) => t(tool))
+                    .join(", ") || t("Not specified"),
                 ],
                 [
                   "Revit version",
-                  submission.workflow.revitVersion || "Not specified",
+                  submission.workflow.revitVersion || t("Not specified"),
                 ],
                 [
                   "Primary pain point",
-                  submission.workflow.painPoint || "Not specified",
+                  submission.workflow.painPoint || t("Not specified"),
                 ],
                 [
                   "Desired outcome",
-                  submission.workflow.desiredOutcome || "Not specified",
+                  submission.workflow.desiredOutcome || t("Not specified"),
                 ],
                 [
                   "Contact",
@@ -268,7 +279,7 @@ export default function AuditPage() {
               ].map(([label, value]) => (
                 <div key={label} className="min-w-0">
                   <dt className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    {label}
+                    {t(label)}
                   </dt>
                   <dd className="mt-2 whitespace-pre-wrap break-words text-base">
                     {value}
@@ -282,17 +293,17 @@ export default function AuditPage() {
             />
             <div className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-800">
               <h3 className="text-lg font-semibold">
-                Want to discuss this workflow?
+                {t("Want to discuss this workflow?")}
               </h3>
               <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                For help validating the assessment or planning implementation,
-                request a manual review using our existing consultation form.
-                Your intake is not transferred to that form; include the
-                workflow details you want to discuss.
+                {t(
+                  "For help validating the assessment or planning implementation, request a manual review using our existing consultation form. Your intake is not transferred to that form; include the workflow details you want to discuss.",
+                )}
               </p>
               <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-                This preview is held only on this page. Refreshing, leaving, or
-                closing the page clears it.
+                {t(
+                  "This preview is held only on this page. Refreshing, leaving, or closing the page clears it.",
+                )}
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <button
@@ -304,13 +315,13 @@ export default function AuditPage() {
                     setSubmission(null);
                   }}
                 >
-                  Edit workflow
+                  {t("Edit workflow")}
                 </button>
                 <Link
                   to="/?inquiry=audit#contact"
                   className="btn-primary inline-flex px-6 py-3 text-sm font-semibold"
                 >
-                  Request a Manual Automation Review
+                  {t("Request a Manual Automation Review")}
                 </Link>
               </div>
             </div>
@@ -322,22 +333,22 @@ export default function AuditPage() {
               tabIndex={-1}
               className="scroll-mt-48 text-3xl font-semibold focus:outline-none"
             >
-              Describe your workflow
+              {t("Describe your workflow")}
             </h2>
             <p className="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">
-              Estimates are fine. Focus on one repetitive workflow and avoid
-              confidential model or customer information. Fields marked * are
-              required.
+              {t(
+                "Estimates are fine. Focus on one repetitive workflow and avoid confidential model or customer information. Fields marked * are required.",
+              )}
             </p>
             <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-              Your draft stays in memory on this page. Reviewing it does not
-              send it. Choosing Analyze Workflow in the next step sends it for
-              analysis. Leaving or refreshing clears the draft.
+              {t(
+                "Your draft stays in memory on this page. Reviewing it does not send it. Choosing Analyze Workflow in the next step sends it for analysis. Leaving or refreshing clears the draft.",
+              )}
             </p>
             <form onSubmit={submit} noValidate className="mt-8 space-y-6">
               <fieldset className={cardClass}>
                 <legend className="px-2 text-lg font-semibold">
-                  1. You and your team
+                  {t("1. You and your team")}
                 </legend>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {textField("name", "Full name", {
@@ -359,14 +370,16 @@ export default function AuditPage() {
                   })}
                   <Field
                     name="discipline"
-                    label="Discipline"
+                    label={t("Discipline")}
                     errors={errors}
                     required
                   >
                     <select {...controlProps("discipline", true)}>
-                      <option value="">Select a discipline</option>
+                      <option value="">{t("Select a discipline")}</option>
                       {disciplines.map((value) => (
-                        <option key={value}>{value}</option>
+                        <option key={value} value={value}>
+                          {t(value)}
+                        </option>
                       ))}
                     </select>
                   </Field>
@@ -374,7 +387,7 @@ export default function AuditPage() {
               </fieldset>
               <fieldset className={cardClass}>
                 <legend className="px-2 text-lg font-semibold">
-                  2. The repetitive work
+                  {t("2. The repetitive work")}
                 </legend>
                 <div className="space-y-6">
                   {textField("title", "Workflow title", {
@@ -398,7 +411,7 @@ export default function AuditPage() {
                     }
                   >
                     <legend className={labelClass}>
-                      Software / tools (optional, select all that apply)
+                      {t("Software / tools (optional, select all that apply)")}
                     </legend>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {softwareOptions.map((tool) => (
@@ -423,7 +436,7 @@ export default function AuditPage() {
                             }
                             className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
                           />
-                          {tool}
+                          {t(tool)}
                         </label>
                       ))}
                     </div>
@@ -432,7 +445,7 @@ export default function AuditPage() {
                         id="audit-software-error"
                         className="mt-2 text-sm text-red-700 dark:text-red-300"
                       >
-                        {errors.software}
+                        {t(errors.software)}
                       </p>
                     )}
                   </fieldset>
@@ -443,30 +456,32 @@ export default function AuditPage() {
               </fieldset>
               <fieldset className={cardClass}>
                 <legend className="px-2 text-lg font-semibold">
-                  3. Frequency and manual effort
+                  {t("3. Frequency and manual effort")}
                 </legend>
                 <div className="grid gap-6 sm:grid-cols-2">
                   <Field
                     name="frequencyType"
-                    label="How often is it performed?"
+                    label={t("How often is it performed?")}
                     errors={errors}
                     required
                   >
                     <select {...controlProps("frequencyType", true)}>
-                      <option value="">Select a frequency</option>
+                      <option value="">{t("Select a frequency")}</option>
                       {frequencyOptions.map((value) => (
                         <option key={value} value={value}>
-                          {value[0].toUpperCase() + value.slice(1)}
+                          {t(value)}
                         </option>
                       ))}
                     </select>
                   </Field>
                   <Field
                     name="occurrences"
-                    label="Occurrences in that period"
+                    label={t("Occurrences in that period")}
                     errors={errors}
                     required
-                    hint="Count workflow repetitions, not the number of people."
+                    hint={t(
+                      "Count workflow repetitions, not the number of people.",
+                    )}
                   >
                     <input
                       {...controlProps("occurrences", true, true)}
@@ -479,10 +494,10 @@ export default function AuditPage() {
                   {form.frequencyType === "custom" && (
                     <Field
                       name="intervalDays"
-                      label="Custom period (days)"
+                      label={t("Custom period (days)")}
                       errors={errors}
                       required
-                      hint="For example: 2 occurrences every 14 days."
+                      hint={t("For example: 2 occurrences every 14 days.")}
                     >
                       <input
                         {...controlProps("intervalDays", true, true)}
@@ -495,10 +510,12 @@ export default function AuditPage() {
                   )}
                   <Field
                     name="duration"
-                    label="Time per person, per occurrence"
+                    label={t("Time per person, per occurrence")}
                     errors={errors}
                     required
-                    hint="Approximate active working time for one participant."
+                    hint={t(
+                      "Approximate active working time for one participant.",
+                    )}
                   >
                     <input
                       {...controlProps("duration", true, true)}
@@ -510,21 +527,23 @@ export default function AuditPage() {
                   </Field>
                   <Field
                     name="durationUnit"
-                    label="Time unit"
+                    label={t("Time unit")}
                     errors={errors}
                     required
                   >
                     <select {...controlProps("durationUnit", true)}>
-                      <option value="hours">Hours</option>
-                      <option value="minutes">Minutes</option>
+                      <option value="hours">{t("Hours")}</option>
+                      <option value="minutes">{t("Minutes")}</option>
                     </select>
                   </Field>
                   <Field
                     name="participants"
-                    label="Number of people involved"
+                    label={t("Number of people involved")}
                     errors={errors}
                     required
-                    hint="People participating in one occurrence of this workflow."
+                    hint={t(
+                      "People participating in one occurrence of this workflow.",
+                    )}
                   >
                     <input
                       {...controlProps("participants", true, true)}
@@ -538,7 +557,7 @@ export default function AuditPage() {
               </fieldset>
               <fieldset className={cardClass}>
                 <legend className="px-2 text-lg font-semibold">
-                  4. What would improve the work?
+                  {t("4. What would improve the work?")}
                 </legend>
                 <div className="grid gap-6 sm:grid-cols-2">
                   {textField("painPoint", "Primary pain point", {
@@ -554,8 +573,9 @@ export default function AuditPage() {
                   role="alert"
                   className="text-sm text-red-700 dark:text-red-300"
                 >
-                  Please correct the highlighted fields before reviewing your
-                  workflow.
+                  {t(
+                    "Please correct the highlighted fields before reviewing your workflow.",
+                  )}
                 </p>
               )}
               <div className="flex flex-col items-start gap-3">
@@ -563,11 +583,12 @@ export default function AuditPage() {
                   type="submit"
                   className="btn-primary px-6 py-3 text-sm font-semibold"
                 >
-                  Review My Workflow
+                  {t("Review My Workflow")}
                 </button>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Next: review your inputs. This does not generate an AI audit
-                  or submit a consultation request.
+                  {t(
+                    "Next: review your inputs. This does not generate an AI audit or submit a consultation request.",
+                  )}
                 </p>
               </div>
             </form>

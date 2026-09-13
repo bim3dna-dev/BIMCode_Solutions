@@ -1,6 +1,6 @@
 # BIMCode Solutions — Project State
 
-Current status: **M2.2 Production activation COMPLETE**; owner-reported Production smoke test PASS. See the closure evidence at the end. Earlier milestone sections preserve historical status. M3 not started.
+Current status: **M2.3 COMPLETE locally, awaiting review**. M2.2 Production activation remains complete. M3 not started.
 
 ## Metadata
 
@@ -10,9 +10,9 @@ Current status: **M2.2 Production activation COMPLETE**; owner-reported Producti
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
-- Current milestone: M2.2 Production activation COMPLETE; Production smoke test PASS (owner evidence).
+- Current milestone: M2.3 Social Footer + Header Language Selector; complete locally, not committed or deployed.
 - Prior committed checkpoint: `96871e1` (M2.1 local preparation). This local validation checkpoint follows it with `chore: prepare Astra audit production activation`; resolve its hash with `git log -1`.
-- Active next step: await separate M3 instruction; M2.2 Production activation COMPLETE.
+- Active next step: review the M2.3 four-language site and social footer, then authorize a release. M3 remains next and unstarted.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -433,3 +433,29 @@ Production activation: **COMPLETE**. Production smoke test: **PASS**, based on o
 M3 can be the next milestone, but has not started and requires a separate instruction. No application, prompt, schema, environment, or WAF changes were made for this documentation closure. Historical unchecked items without supplied evidence (such as a separate contact regression result or the exact Preview hostname) are not fabricated as passed.
 
 Closure validation: all 20 offline tests PASS; production build PASS with existing dependency warnings; routing validation PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local is ignored and untracked, verified using Git metadata only. Closure commit message: `chore: close Astra production activation`; branch main.
+
+
+## M2.3 Social Footer + Header Language Selector
+
+Status: **COMPLETE locally / READY FOR REVIEW**. Baseline was clean main at `8342c38f9ede288489e2df66be7eb0543021f183`; the original 20 tests and build passed before changes. No AGENTS.md was found. No commit, push, deployment, real audit request, secret inspection, backend/WAF/payment change, or M3 work was performed.
+
+Locales: English (`en`, default), Netherlands Dutch (`nl`), German (`de`), and Bosnian (`bs`). Static translations are centralized in src/i18n/translations.js, with English source-string fallback. A small React context provides t/locale/setLocale; no translation service, runtime LLM translation, or new dependency. Selection persists in localStorage under bimcode_locale and updates html lang. Invalid/missing/blocked storage falls back safely. Header uses a keyboard-accessible native select with language names/globe, visible focus, and separate desktop/mobile placement within the existing nav pattern. Navigation switches to the wrapping layout below xl to accommodate longer translations.
+
+Localized content covers navigation, homepage, offers/solutions, case study, about/contact, blog, not-found page, footer, audit headings/form/static result labels, validation and service-status messages. Audit and contact payload values remain canonical; user text and generated Astra prose are not translated. Generated prose retains English language annotations, and other locales see a neutral English-assessment note. No schema or provider changes. Language switches preserve current React form state.
+
+Footer social links: LinkedIn https://www.linkedin.com/in/emin-avdovic-90210/ ; X https://x.com/bimcodesolution ; Instagram https://www.instagram.com/bimcode_solutions_/ ; XING https://www.xing.com/discover/your-posts . Icons are monochrome 19px, in 40px focusable links with accessible labels, target=_blank and rel=noopener noreferrer. XING is the exact owner-supplied discover/your-posts destination, not a claimed public company profile. Social posting remains manual/approval-based until M7.
+
+YouTube: **OMITTED / public channel URL pending**. Repository search found only the existing video https://youtu.be/IUdbeoPnSf8 and its embed, not a verified public channel URL. No channel was guessed; the homepage video stays intact.
+
+Created: src/i18n/LocaleProvider.jsx, locale.js, translations.js, locale.test.js; src/components/LanguageSelector.jsx and SocialLinks.jsx; src/data/social-links.js.
+Modified: README.md, PROJECT_STATE.md, package.json test glob, src/main.jsx, src/index.css (localized compound wrapping), Header/Footer/ThemeToggle, public page and section components, AuditAnalysis presentation, and tracked generated dist assets. No dependency versions/lockfile or backend files changed.
+
+Validation: 26 deterministic tests pass (original 20 plus six locale/persistence/fallback/catalog/payload/social tests). Production build, routing validation, diff checks, and secret-pattern scan repeated for closure. Existing browser-data and Zod annotation warnings remain. .env.local remains ignored/untracked; contents not read.
+
+Browser verification used the existing temporary Playwright/Edge installation, not a new repository dependency: all four locales across /, /solutions, /case-study, /audit, /blog and a blog detail, plus /#about and /#contact; /about and /contact retain their existing localized not-found behavior. Widths 360, 768, 1280, and 1440px passed overflow checks after enabling wrapping for long translated compounds. German mobile screenshot inspected. Keyboard selector and refresh persistence passed. Known catalog English-copy gaps on these rendered pages: none (proper names/technical terms intentionally retained).
+
+Audit regression: per-locale synthetic forms normalize to unchanged Mechanical/weekly/hours/Revit values; mocked success renders unchanged English prose, locks duplicate submissions, and preserves inputs on edit. HTML 429 responses display the localized limit message. Contact regression: intent query selection and synthetic email-app fallback status passed in all four locales, without sending email. Browser-managed native validation messages follow browser settings. Footer destinations/labels/rel/target checked; no social account navigation/posting was performed.
+
+Known scope limits: Astra generated prose remains English; multilingual AI output and locale-prefixed SEO routes are future enhancements. No speculative hreflang. Static translations are ready for owner review; no independent native-speaker sign-off is claimed. Public YouTube channel URL is missing.
+
+Exact next action: review wording and layout in all four locales and the supplied social destinations; provide a verified public YouTube channel URL if one should be added. M2.3 remains uncommitted/unpushed for review. Next milestone is M3 Dynamic diagnostic interview / follow-up questioning, not started.

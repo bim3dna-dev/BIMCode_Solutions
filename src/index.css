@@ -34,6 +34,8 @@
 @layer components {
   .section-container {
     @apply mx-auto w-full max-w-6xl px-6 lg:px-8;
+    /* Long localized compounds must wrap within narrow cards and headings. */
+    overflow-wrap: anywhere;
   }
 }
 

@@ -1,3 +1,4 @@
+import { useLocale } from "../i18n/LocaleProvider.jsx";
 const implementedWorkflows = [
   "Pipe and duct tagging automation",
   "Sheet and PDF export tooling",
@@ -26,36 +27,43 @@ const automationModules = [
 ];
 
 export default function CaseStudyPage() {
+  const { t } = useLocale();
   return (
     <section className="bg-white py-16 dark:bg-slate-950">
       <div className="section-container space-y-12">
         <header className="max-w-4xl space-y-4">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-brand-500 dark:text-brand-300">
-            Case Study
+            {t("Case Study")}
           </p>
           <h1 className="text-4xl font-semibold text-slate-900 dark:text-white">
-            Internal BIM Automation Toolkit for Revit Production Teams
+            {t("Internal BIM Automation Toolkit for Revit Production Teams")}
           </h1>
           <p className="text-base text-slate-600 dark:text-slate-300">
-            A standards-first automation approach for repetitive Revit production workflows.
+            {t(
+              "A standards-first automation approach for repetitive Revit production workflows.",
+            )}
           </p>
         </header>
 
         <div className="grid gap-10 lg:grid-cols-2">
           <article className="space-y-3">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Problem
+              {t("Problem")}
             </h2>
             <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
-              BIM teams lose time on repetitive production tasks: tagging, checking, exports, sheet setup, and model hygiene. These tasks often depend on manual consistency, project-specific standards, and senior staff attention.
+              {t(
+                "BIM teams lose time on repetitive production tasks: tagging, checking, exports, sheet setup, and model hygiene. These tasks often depend on manual consistency, project-specific standards, and senior staff attention.",
+              )}
             </p>
           </article>
           <article className="space-y-3">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Solution
+              {t("Solution")}
             </h2>
             <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
-              BIMCode Solutions developed a Revit-native automation approach using a custom pyRevit-based toolbar and supporting Python workflows. The focus was not generic automation, but production tools aligned with BIM standards, project templates, and repeatable delivery processes.
+              {t(
+                "BIMCode Solutions developed a Revit-native automation approach using a custom pyRevit-based toolbar and supporting Python workflows. The focus was not generic automation, but production tools aligned with BIM standards, project templates, and repeatable delivery processes.",
+              )}
             </p>
           </article>
         </div>
@@ -63,26 +71,26 @@ export default function CaseStudyPage() {
         <div className="grid gap-10 lg:grid-cols-2">
           <article>
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Implemented workflows
+              {t("Implemented workflows")}
             </h2>
             <ul className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
               {implementedWorkflows.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="mt-[6px] h-1.5 w-1.5 bg-brand-500" />
-                  <span>{item}</span>
+                  <span>{t(item)}</span>
                 </li>
               ))}
             </ul>
           </article>
           <article>
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Technical stack
+              {t("Technical stack")}
             </h2>
             <ul className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
               {technicalStack.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="mt-[6px] h-1.5 w-1.5 bg-brand-500" />
-                  <span>{item}</span>
+                  <span>{t(item)}</span>
                 </li>
               ))}
             </ul>
@@ -91,7 +99,7 @@ export default function CaseStudyPage() {
 
         <section className="space-y-5 border-t border-slate-200/70 pt-10 dark:border-slate-800/70">
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-            Automation modules represented in this toolkit
+            {t("Automation modules represented in this toolkit")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {automationModules.map((module) => (
@@ -99,7 +107,7 @@ export default function CaseStudyPage() {
                 key={module}
                 className="border border-slate-200/70 bg-white p-5 text-sm font-semibold text-slate-800 shadow-sm dark:border-slate-800/70 dark:bg-slate-950 dark:text-slate-100"
               >
-                {module}
+                {t(module)}
               </article>
             ))}
           </div>
@@ -107,13 +115,18 @@ export default function CaseStudyPage() {
 
         <article className="max-w-4xl space-y-3 border-t border-slate-200/70 pt-10 dark:border-slate-800/70">
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
-            Outcome
+            {t("Outcome")}
           </h2>
           <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            Reduced repetitive production steps, improved workflow consistency, and created a reusable automation framework for future BIM workflows.
+            {t(
+              "Reduced repetitive production steps, improved workflow consistency, and created a reusable automation framework for future BIM workflows.",
+            )}
           </p>
-          <a href="/?inquiry=tool#contact" className="btn-primary inline-flex px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em]">
-            Request Automation Consultation
+          <a
+            href="/?inquiry=tool#contact"
+            className="btn-primary inline-flex px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em]"
+          >
+            {t("Request Automation Consultation")}
           </a>
         </article>
       </div>
