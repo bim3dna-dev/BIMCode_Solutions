@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { auditResultSchema } from "../../../shared/audit-result.js";
 
-const genericError =
-  "Analysis is temporarily unavailable. Your workflow details have not been lost; please try again.";
-const errorMessages = {
-  INVALID_INPUT:
-    "Please edit your workflow and check the required fields and numeric values.",
-  PAYLOAD_TOO_LARGE: "Please shorten your workflow description and try again.",
-  RATE_LIMITED: "Analysis is busy. Please wait a minute before trying again.",
-  ANALYSIS_REFUSED:
-    "We could not assess this workflow. Please edit its description or request a manual review.",
-};
+import { analysisErrorMessage, genericError } from "./analysis-errors.js";
+
 const engagementLabels = {
   audit: "Automation Audit",
   sprint: "Automation Sprint",
@@ -50,11 +42,11 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
         body: JSON.stringify(submission),
         signal: request.signal,
       });
-      const body = await response.json();
       if (!response.ok) {
-        setError(errorMessages[body?.error?.code] || genericError);
+        setError(await analysisErrorMessage(response));
         return;
       }
+      const body = await response.json();
       const parsed = auditResultSchema.safeParse(body?.result);
       if (!parsed.success) throw new Error("Invalid assessment");
       setResult(parsed.data);

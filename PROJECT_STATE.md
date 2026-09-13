@@ -3,14 +3,14 @@
 ## Metadata
 
 - Last updated: 2026-09-12 (Europe/Sarajevo).
-- Current branch: `main`.
+- Current branch: `preview/audit-astra`.
 - Latest relevant commit / M1 checkpoint: `fe2b496dd89fc0e12579e469debd961e1dd83430` — Milestone M1 complete... . Already existed at session start; `git push origin main` succeeded with `Everything up-to-date` on 2026-09-12. No duplicate commit or history rewrite.
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
 - Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; local live provider validation has passed; Preview, deployed routing verification, and distributed rate limiting remain activation requirements.
 - Prior committed checkpoint: `96871e1` (M2.1 local preparation). This local validation checkpoint follows it with `chore: prepare Astra audit production activation`; resolve its hash with `git log -1`.
-- Active next step: M2.1 ? Production Activation and Live Astra Validation; local live validation complete, Vercel Preview validation pending. Production remains disabled.
+- Active next step: M2.1 ? Production Activation and Live Astra Validation; local live and Preview validation complete; Production activation pending. Production remains disabled.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -363,17 +363,17 @@ Exact next action: await a separately authorized production activation task. Imp
 
 ## M2.1 ? Production Activation and Live Astra Validation
 
-Status: **LOCAL VALIDATION COMPLETE**. M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`; M2 production activation: **PENDING**. This section supersedes historical M2 payload descriptions that excluded operational counts.
+Status: **PREVIEW COMPLETE**. M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`; M2 production activation: **PENDING**. This section supersedes historical M2 payload descriptions that excluded operational counts.
 
 Model allowlist now preserves frequency type/occurrences/custom interval, manual duration/unit/per-person basis, and participants alongside technical workflow text. Contact name/email/company/role and financial fields remain excluded. Instructions allow qualitative context only, prohibit annual/financial arithmetic, and retain deterministic Revit API first guidance. Usage logging adds reasoning and total tokens without public UI exposure. The explicit synthetic live test now exercises six-person weekly piping QA and prints schema/usage/timing plus synthetic output for manual review.
 
-Local live validation: **COMPLETE**. Vercel Preview validation: **PENDING**. Distributed rate limiting: **PENDING**. Production activation: **PENDING**.
+Local live validation: **COMPLETE**. Vercel Preview validation: **COMPLETE**. Distributed rate limiting: **CONFIGURED AND VERIFIED**. Production activation: **PENDING**.
 
 Owner-reported explicit live provider validation: **PASS** (`live_audit_schema_passed`). Model: `gpt-6-astra`; elapsed time: **19.802 s** (19,802 ms); input tokens: **786**; output tokens: **1,061**; cached input tokens: **0**; reasoning tokens: **0**; total tokens: **1,847**. Structured Output schema: **PASS**. Qualitative architecture gate: **PASS**. This records the owner's completed run and manual review; no additional billable call was made for this checkpoint.
 
 The reported review confirms deterministic Revit API/rules first, read-only inspection before controlled corrections, AI outside the deterministic execution engine, Revit API constraints, and worksharing/transactions/rollback considerations. No financial ROI arithmetic, guaranteed savings, or unsupported capability claims were reported. The supplied evidence identifies no prompt/schema defect requiring correction. Prompt and schema remain unchanged in this checkpoint. Observe joining artifacts such as `Externalprocessing`, `systemconfiguration`, and `controlledcorrections` during Preview; no systematic defect is established and no speculative text post-processing was added. Token usage is measured; production cost-budget acceptance and deployed latency remain separate gates.
 
-Current rate-limit status: **RATE_LIMITING_NOT_YET_CONFIGURED**. Production enablement and M3 were not started.
+Current rate-limit status: **RATE_LIMITING_CONFIGURED_EXTERNALLY** (owner-verified Preview). Production enablement and M3 were not started.
 
 The operational runbook in docs/AUDIT_BACKEND.md contains exact existing variables, Preview-only steps, 3 POST requests per IP per 600-second WAF recommendation, coverage verification, timeout/error matrix, troubleshooting, and the explicit activation checklist. SDK timeout remains 45s, browser 55s, Vercel 60s; output cap remains 4,000 with low reasoning/verbosity.
 
@@ -381,3 +381,20 @@ Validation checkpoint: all 18 offline tests PASS; production build PASS with exi
 
 Exact next action: configure a protected Vercel Preview with server-only variables and exact Preview origin, verify external rate limiting/alias coverage, deploy Preview, and run the runbook's end-to-end success/error/routing/log checks. Keep Production AUDIT_ANALYSIS_ENABLED=false/unset. Production remains pending all activation gates and explicit authorization; M3 is not started.
 
+
+
+## M2.1 Preview closure (2026-09-13)
+
+Preview end-to-end validation: **COMPLETE**. Distributed WAF rate limiting: **CONFIGURED AND VERIFIED** (`RATE_LIMITING_CONFIGURED_EXTERNALLY`). Production activation: **PENDING**. Evidence is owner-reported; no additional live provider request was made for this checkpoint.
+
+Browser -> Vercel Function -> `gpt-6-astra` -> assessment UI: **PASS**. Three POST `/api/audit/analyze` requests returned HTTP 200, with three successful Astra requests in function logs. The next request was rate-limited; Firewall Overview showed **Rate Limited: 1**, and it did not produce another normal Astra function invocation.
+
+Verified active rule: `rate-limit-audit-analysis`; exact path `/api/audit/analyze`; method `POST`; strategy **Fixed Window**; limit **3 requests**; window **600 seconds**; counting key **IP Address**; action **Too Many Requests (429)**. This establishes enforcement on the tested Preview; Production/other alias coverage must be confirmed before activation.
+
+Stable Preview origin: **exact hostname not supplied in the evidence and not recorded in repository configuration**. Do not substitute a synthetic hostname or infer an alias from the branch name. Record the tested canonical origin from the operator before Production handoff. Development branch: `preview/audit-astra`.
+
+HTTP 429 now displays "You've reached the analysis limit. Please wait a few minutes and try again." before parsing any body, including non-JSON external responses. Other server/provider failures retain the existing temporary-unavailable message. No firewall details appear in the UI. Deterministic regression tests cover JSON/HTML/empty 429 responses and generic server errors.
+
+Production remains disabled. M3 has not started. Before Production activation: record the exact tested origin, confirm Production origin/environment and WAF alias coverage, close the remaining cost/error/secret-isolation checklist items, and obtain explicit enablement authorization. Preview evidence alone is not authorization to enable Production.
+
+Closure checks: 20 offline tests PASS; production build PASS (existing dependency warnings); Vercel routing normalization and API exclusions PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local remains ignored and untracked; its contents were not read. Checkpoint: `chore: close Astra preview validation` on `preview/audit-astra`.

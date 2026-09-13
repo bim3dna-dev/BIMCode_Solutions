@@ -28,7 +28,7 @@ Use ignored `.env.local` locally; configure secrets directly in Vercel for each 
 - `AUDIT_ALLOWED_ORIGIN`: exact site origin with scheme and optional port, no trailing slash or path. Use the deployed canonical origin; separately configure the actual preview origin for staging tests.
 - `VITE_CONTACT_FORM_ENDPOINT`: existing optional public contact configuration, unchanged.
 
-The owner has completed local live provider validation successfully; see M2.1 evidence below. Preview and Production environment validation remain pending. Secret values and local environment contents are not inspected or recorded in this checkpoint.
+The owner has completed local live provider validation successfully; see M2.1 evidence below. Preview validation has passed; Production activation remains pending. Secret values and local environment contents are not inspected or recorded in this checkpoint.
 
 ## Mandatory pre-production protection
 
@@ -79,7 +79,7 @@ M3 follow-up interviewing and M4 deterministic economics remain separate milesto
 ## M2.1 activation status
 
 M2 implementation: **COMPLETE** at `253b64118ba0b96e027d4578b4addd713f25d909`.
-Local live validation: **COMPLETE**. Vercel Preview validation: **PENDING**. Distributed rate limiting: **PENDING**. Production activation: **PENDING**.
+Local live validation: **COMPLETE**. Vercel Preview validation: **COMPLETE**. Distributed rate limiting: **CONFIGURED AND VERIFIED**. Production activation: **PENDING**.
 
 Owner-reported explicit live provider validation: **PASS** (`live_audit_schema_passed`). Model: `gpt-6-astra`; elapsed time: **19.802 s** (19,802 ms); input tokens: **786**; output tokens: **1,061**; cached input tokens: **0**; reasoning tokens: **0**; total tokens: **1,847**. Structured Output schema: **PASS**. Qualitative architecture gate: **PASS**. This records the owner's completed run and manual review; no additional billable call was made for this checkpoint.
 
@@ -89,12 +89,12 @@ The reported review confirms deterministic Revit API/rules first, read-only insp
 Rate-limit states are operational evidence labels, not new environment variables:
 
 - `RATE_LIMITING_IMPLEMENTED_IN_CODE`: no; there is no application distributed limiter.
-- `RATE_LIMITING_CONFIGURED_EXTERNALLY`: unverified; use only after publishing and testing the external rule.
-- **Current: `RATE_LIMITING_NOT_YET_CONFIGURED`.** Public activation remains blocked.
+- `RATE_LIMITING_CONFIGURED_EXTERNALLY`: configured and verified on Preview, per owner evidence below.
+- **Current: `RATE_LIMITING_CONFIGURED_EXTERNALLY`.** Owner verified Preview enforcement; Production activation remains pending.
 
 ## Exact WAF rule and verification
 
-In Vercel, select the project > Firewall > Configure > + New Rule. Name it `audit-analyze-ip-limit`. Add AND conditions: Request Path equals `/api/audit/analyze`; Request Method equals `POST`. Choose Rate Limit, Fixed Window, Time Window **600 seconds**, Request Limit **3**, counting key **IP only**, and action **Default (429)**. Save Rule > Review Changes > Publish. Do not select Log as enforcement.
+In Vercel, select the project > Firewall > Configure > + New Rule. Name it `rate-limit-audit-analysis`. Add AND conditions: Request Path equals `/api/audit/analyze`; Request Method equals `POST`. Choose Rate Limit, Fixed Window, Time Window **600 seconds**, Request Limit **3**, counting key **IP only**, and action **Default (429)**. Save Rule > Review Changes > Publish. Do not select Log as enforcement.
 
 Current [Vercel rate-limit documentation](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting) lists fixed windows up to ten minutes on all plans. Account availability, existing rule quotas, and Preview coverage still require inspection. Counters are regional, not a global spending ceiling. Fixed-window boundaries can allow bursts.
 
@@ -161,8 +161,9 @@ External WAF may return non-JSON bodies: verify the UI still shows a safe failur
 - [ ] Measured token usage/cost is accepted.
 - [x] Provider timeout/error mapping verified offline.
 - [ ] Deployed timeout budget and error UX verified.
-- [ ] WAF actually configured, enforced, and alias coverage verified.
-- [ ] Protected Vercel Preview works end-to-end.
+- [x] WAF configured and enforced on tested Preview (owner-reported).
+- [ ] Production and other alias WAF coverage confirmed.
+- [x] Vercel Preview works end-to-end (owner-reported).
 - [x] Local source/generated-asset secret scan passes.
 - [ ] Deployed assets/responses/logs contain no secrets.
 - [ ] Production server variables prepared with enablement still false/unset.
@@ -173,3 +174,20 @@ After every unchecked gate passes, an authorized operator may set Production `AU
 ## Troubleshooting
 
 Missing-key live failure: set the ignored local server key and rerun explicitly. 503: inspect flag, key presence, model access, and exact origin configuration without printing secrets. 403: compare actual browser Origin with the environment value and use the canonical Preview alias. 502: check safe error category and incomplete output; do not expose raw provider exceptions. 504: retain input, retry deliberately, and inspect latency before changing limits. 429: distinguish WAF events from provider limits; neither proves the other is configured. API HTML: inspect deployed routing/function detection. A live schema success alone does not close the activation gate.
+
+
+## M2.1 Preview closure (2026-09-13)
+
+Preview end-to-end validation: **COMPLETE**. Distributed WAF rate limiting: **CONFIGURED AND VERIFIED** (`RATE_LIMITING_CONFIGURED_EXTERNALLY`). Production activation: **PENDING**. Evidence is owner-reported; no additional live provider request was made for this checkpoint.
+
+Browser -> Vercel Function -> `gpt-6-astra` -> assessment UI: **PASS**. Three POST `/api/audit/analyze` requests returned HTTP 200, with three successful Astra requests in function logs. The next request was rate-limited; Firewall Overview showed **Rate Limited: 1**, and it did not produce another normal Astra function invocation.
+
+Verified active rule: `rate-limit-audit-analysis`; exact path `/api/audit/analyze`; method `POST`; strategy **Fixed Window**; limit **3 requests**; window **600 seconds**; counting key **IP Address**; action **Too Many Requests (429)**. This establishes enforcement on the tested Preview; Production/other alias coverage must be confirmed before activation.
+
+Stable Preview origin: **exact hostname not supplied in the evidence and not recorded in repository configuration**. Do not substitute a synthetic hostname or infer an alias from the branch name. Record the tested canonical origin from the operator before Production handoff. Development branch: `preview/audit-astra`.
+
+HTTP 429 now displays "You've reached the analysis limit. Please wait a few minutes and try again." before parsing any body, including non-JSON external responses. Other server/provider failures retain the existing temporary-unavailable message. No firewall details appear in the UI. Deterministic regression tests cover JSON/HTML/empty 429 responses and generic server errors.
+
+Production remains disabled. M3 has not started. Before Production activation: record the exact tested origin, confirm Production origin/environment and WAF alias coverage, close the remaining cost/error/secret-isolation checklist items, and obtain explicit enablement authorization. Preview evidence alone is not authorization to enable Production.
+
+Closure checks: 20 offline tests PASS; production build PASS (existing dependency warnings); Vercel routing normalization and API exclusions PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local remains ignored and untracked; its contents were not read. Checkpoint: `chore: close Astra preview validation` on `preview/audit-astra`.
