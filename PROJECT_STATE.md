@@ -1,5 +1,7 @@
 # BIMCode Solutions — Project State
 
+Current status: **M2.2 Production activation COMPLETE**; owner-reported Production smoke test PASS. See the closure evidence at the end. Earlier milestone sections preserve historical status. M3 not started.
+
 ## Metadata
 
 - Last updated: 2026-09-13 (Europe/Sarajevo).
@@ -8,9 +10,9 @@
 - M0 checkpoint: `4f279634a871ba2cab7dcc282be750e45e645774`, separately committed and pushed.
 - M1.1 checkpoint: `22708f8ad3958b5fb9e5e7ede764a066ef494867` — docs: define distribution and workflow video strategy. Committed separately and successfully pushed to `origin/main` on 2026-09-12.
 - Completed milestone: M1.2 — Production Workflow Demo. Complete; the owner confirmed manual production review passed. Implementation commit: `4958435ee94592419561f6eb567a9cf687b71249`. The public video URL dependency is resolved.
-- Current milestone: M2 — Secure Astra Analysis Backend. M2 implementation: COMPLETE. M2 production activation: PENDING. Local/offline review passed, as confirmed by the owner. Backend remains disabled by default; local live provider validation has passed; Preview, deployed routing verification, and distributed rate limiting remain activation requirements.
+- Current milestone: M2.2 Production activation COMPLETE; Production smoke test PASS (owner evidence).
 - Prior committed checkpoint: `96871e1` (M2.1 local preparation). This local validation checkpoint follows it with `chore: prepare Astra audit production activation`; resolve its hash with `git log -1`.
-- Active next step: M2.2 Production Activation Preparation; ready for manual Production configuration. M3 not started.
+- Active next step: await separate M3 instruction; M2.2 Production activation COMPLETE.
 - Next milestone after M2 activation/validation: M3 — Dynamic Diagnostic Interview. Not started.
 - This file is the canonical handoff; do not rely on chat history.
 
@@ -413,3 +415,21 @@ Production environment: **PENDING**, developer configures privately. Production 
 Exact remaining action: follow docs/AUDIT_BACKEND.md M2.2 manual steps to configure Production-only variables, deliberately enable and redeploy, submit one synthetic workflow, verify HTTP 200/rendering/safe usage/client isolation/Production WAF/contact behavior, and record evidence. Prefer WAF configuration/log verification over unnecessary paid calls. Do not mark M2.2 COMPLETE before real Production validation.
 
 M2.2 validation: before integration and again on integrated main, all 20 offline tests PASS, production build PASS (existing dependency warnings), routing normalization/API exclusion PASS, git diff --check PASS, and repository/generated-asset secret-pattern scan PASS. No local env file is tracked; .env.local ignore rule verified. Only the two operations documents changed after integration.
+
+
+## M2.2 Production activation closure (2026-09-13)
+
+Production activation: **COMPLETE**. Production smoke test: **PASS**, based on owner-reported Production evidence. This closure supersedes the earlier preparation/Preview status snapshots; no additional live API call was made by Codex.
+
+- Canonical origin: `https://www.bimcodesolutions.com`; tested URL: `https://www.bimcodesolutions.com/audit`. Production origin validation: **PASS**.
+- Environment: `production`; branch: `main`. Vercel Production function invocation succeeded.
+- `POST /api/audit/analyze`: **HTTP 200**; assessment rendered successfully in the browser.
+- External call confirmed: `POST https://api.openai.com/v1/responses` (OpenAI Responses API).
+- Model: `gpt-6-astra`. Execution duration: approximately **20.2 seconds**.
+- Usage: input tokens **774**; output tokens **1,031**; cached input tokens **0**; reasoning tokens **0**; total tokens **1,805**.
+- WAF remains configured externally: `rate-limit-audit-analysis`, POST `/api/audit/analyze`, Fixed Window, **3 requests / 600 seconds / IP**, **429 Too Many Requests**. Preview enforcement was previously verified; this Production report confirms the rule remains configured, without claiming a new Production blocked-request test.
+- Secret isolation: **PASS (observed)**; owner reports no client-side secret exposure. No secret values or local environment contents were inspected or recorded for this checkpoint.
+
+M3 can be the next milestone, but has not started and requires a separate instruction. No application, prompt, schema, environment, or WAF changes were made for this documentation closure. Historical unchecked items without supplied evidence (such as a separate contact regression result or the exact Preview hostname) are not fabricated as passed.
+
+Closure validation: all 20 offline tests PASS; production build PASS with existing dependency warnings; routing validation PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local is ignored and untracked, verified using Git metadata only. Closure commit message: `chore: close Astra production activation`; branch main.

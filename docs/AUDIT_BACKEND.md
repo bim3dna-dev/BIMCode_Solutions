@@ -1,5 +1,7 @@
 # Audit backend operations
 
+Current status: **M2.2 Production activation COMPLETE**; owner-reported Production smoke test PASS. See the closure evidence at the end. Earlier milestone sections preserve historical status. M3 not started.
+
 ## Architecture and contracts
 
 `POST /api/audit/analyze` runs as a Vercel Node.js Web Standard function (`export default { fetch }`). Shared schemas are in `shared/`; server-only code is in `server/audit/`. No Express, database, persistent sessions, or authentication service is introduced. The local Node HTTP adapter calls the same handler; Vite proxies `/api` in development only.
@@ -236,3 +238,21 @@ Synthetic input: name `Production Test User`; email `test@example.com`; company 
 - [ ] Explicit manual Production activation completed and recorded.
 
 Production environment configuration, resulting deployment, paid smoke test, usage logs, and Production WAF are **PENDING/unverified**. No live model request or contact submission was made during preparation. M3 remains unstarted.
+
+
+## M2.2 Production activation closure (2026-09-13)
+
+Production activation: **COMPLETE**. Production smoke test: **PASS**, based on owner-reported Production evidence. This closure supersedes the earlier preparation/Preview status snapshots; no additional live API call was made by Codex.
+
+- Canonical origin: `https://www.bimcodesolutions.com`; tested URL: `https://www.bimcodesolutions.com/audit`. Production origin validation: **PASS**.
+- Environment: `production`; branch: `main`. Vercel Production function invocation succeeded.
+- `POST /api/audit/analyze`: **HTTP 200**; assessment rendered successfully in the browser.
+- External call confirmed: `POST https://api.openai.com/v1/responses` (OpenAI Responses API).
+- Model: `gpt-6-astra`. Execution duration: approximately **20.2 seconds**.
+- Usage: input tokens **774**; output tokens **1,031**; cached input tokens **0**; reasoning tokens **0**; total tokens **1,805**.
+- WAF remains configured externally: `rate-limit-audit-analysis`, POST `/api/audit/analyze`, Fixed Window, **3 requests / 600 seconds / IP**, **429 Too Many Requests**. Preview enforcement was previously verified; this Production report confirms the rule remains configured, without claiming a new Production blocked-request test.
+- Secret isolation: **PASS (observed)**; owner reports no client-side secret exposure. No secret values or local environment contents were inspected or recorded for this checkpoint.
+
+M3 can be the next milestone, but has not started and requires a separate instruction. No application, prompt, schema, environment, or WAF changes were made for this documentation closure. Historical unchecked items without supplied evidence (such as a separate contact regression result or the exact Preview hostname) are not fabricated as passed.
+
+Closure validation: all 20 offline tests PASS; production build PASS with existing dependency warnings; routing validation PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local is ignored and untracked, verified using Git metadata only. Closure commit message: `chore: close Astra production activation`; branch main.
