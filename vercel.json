@@ -1,5 +1,8 @@
 {
-  "functions": { "api/audit/analyze.js": { "maxDuration": 60 } },
+  "functions": {
+    "api/audit/analyze.js": { "maxDuration": 60 },
+    "api/audit/interview.js": { "maxDuration": 60 }
+  },
   "rewrites": [
     {
       "source": "/((?!api(?:/|$)).*)",

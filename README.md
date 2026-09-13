@@ -6,7 +6,7 @@ BIMCode Solutions provides BIM automation, Revit API, Python, pyRevit, and AI-as
 
 Production URL: https://www.bimcodesolutions.com (provided by the project owner).
 
-React 18/Vite 7 single-page application using React Router 6, Tailwind CSS 3, PostCSS/Autoprefixer, and lucide-react icons. A Vercel Node.js function provides workflow assessment through the official OpenAI SDK. Zod defines shared validation contracts. There is no database, authentication, or payment system. Deployment account/settings and API enablement must be verified with the owner; the analysis endpoint is disabled by default until production protections are configured.
+React 18/Vite 7 single-page application using React Router 6, Tailwind CSS 3, PostCSS/Autoprefixer, and lucide-react icons. A Vercel Node.js function provides workflow assessment through the official OpenAI SDK. Zod defines shared validation contracts. M3 uses an expiring Redis REST store for interview state; there is no account or payment system. Deployment account/settings and API enablement must be verified with the owner; the analysis endpoint is disabled by default until production protections are configured.
 
 ## Local development
 
@@ -39,6 +39,9 @@ No environment variables are needed for installation, frontend builds, or offlin
 | `OPENAI_API_KEY` | For analysis | Server-side secret only; never use a `VITE_` prefix or commit a real key. |
 | `OPENAI_MODEL` | No | Server-selected model, default `gpt-6-astra`. Client model overrides are rejected. |
 | `AUDIT_ANALYSIS_ENABLED` | For analysis | Defaults to disabled. Set exactly `true` only after model access and production rate limiting are verified. |
+| `AUDIT_INTERVIEW_ENABLED` | For M3 | Defaults to disabled. Set exactly `true` only in a prepared deployment with shared state and both WAF rules. |
+| `AUDIT_STATE_REDIS_REST_URL` | For M3 | HTTPS root URL of an Upstash-compatible Redis REST database supporting GET and atomic EVAL/SET with expiry. |
+| `AUDIT_STATE_REDIS_REST_TOKEN` | For M3 | Server-only read/write token; never expose with a VITE prefix. |
 | `AUDIT_ALLOWED_ORIGIN` | For analysis | One exact browser origin, no trailing slash, e.g. `https://www.bimcodesolutions.com`. Use the actual preview origin for preview testing. |
 
 Copy `.env.example` to ignored `.env.local` for local configuration. Restart the relevant development process after changes. Configure server variables in the Vercel environment settings, never in browser code. Vite embeds `VITE_*` values in browser assets: only public contact configuration belongs there. Do not broaden Vite's environment prefix to expose server secrets.
@@ -59,7 +62,7 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 | `src/data/content.js` | Static offers, solutions, benefits, outcomes, services, blog posts |
 | `src/features/audit/` | Intake options, validation, normalization, JSDoc model, and model tests |
 | `shared/` | Shared intake enums/limits, strict normalized input and assessment schemas |
-| `api/audit/analyze.js` | Vercel Node.js Web Standard function entry point |
+| `api/audit/analyze.js`, `api/audit/interview.js` | Vercel Node.js assessment and interview entry points |
 | `server/audit/` | Bounded request handling, provider boundary/instructions, safe usage logging, offline tests |
 | `scripts/` | Local HTTP adapter and explicit live API smoke test |
 | `src/theme/` | Light/dark theme, system preference, localStorage persistence |
@@ -73,11 +76,15 @@ No Formspree SDK, Formspree-specific endpoint, or integration exists in the chec
 
 Routes: `/`, `/solutions`, `/case-study`, `/blog`, `/blog/:slug`, `/audit`. `/products` redirects to `/solutions`. Contact is the homepage section at `/#contact`, not a `/contact` route. Unknown paths show the not-found page; unknown blog slugs redirect to `/blog`. Content comes from local JavaScript, with no CMS or remote content API.
 
-The Audit flow is intake → review → explicit Analyze Workflow → technical assessment or retryable error. Review stays local. Analysis posts the normalized intake to `/api/audit/analyze`, where identity fields are validated but excluded from the model request. Workflow context includes frequency, occurrence count, duration/unit/basis, and participant count for qualitative assessment; identity and financial fields are excluded. Free text is not automatically anonymized, so visitors are told to remove sensitive information. No leads are silently submitted and no database is used. Draft/result state clears on navigation or refresh. The manual-review CTA still opens `/?inquiry=audit#contact` without transferring intake details. No ROI arithmetic or dynamic interview is implemented.
+The Audit flow is intake -> review -> explicit Analyze Workflow -> zero to four focused diagnostic questions -> technical assessment. The browser starts `/api/audit/interview` with a normalized intake and a random idempotency ID, then sends only the session/question IDs and each answer. `/api/audit/analyze` takes the ready interview ID. The server owns history, strips contact identity, caps decision calls at four and final calls at one, and validates all outputs. Original form data stays intact on interview restart; draft/result state clears on navigation or refresh. Free text is not automatically anonymized. No lead is silently submitted. The manual-review CTA still opens `/?inquiry=audit#contact` without transferring intake details. No ROI arithmetic is implemented.
+
+M3 requires an externally configured **shared Redis REST store**, using the existing platform `fetch` rather than another SDK. Workflow context, diagnostic answers, and the cached assessment expire after 30 minutes; contact fields are never stored there. See [M3 operations and Preview gates](docs/AUDIT_BACKEND.md#m3-dynamic-diagnostic-interview) for provisioning, WAF limits, failure/retry behavior, and explicit manual live tests. Offline tests use mocked storage and provider transport and need no credentials.
+
+**M3 is not activated or deployed by this change.** Keep `AUDIT_INTERVIEW_ENABLED=false` until Preview has its state store, origin, and differentiated WAF rules. The M3 frontend requires those services; do not deploy it to Production before validation. With the flag off, the existing M2 final API contract remains available, but the new interview route fails closed. With it on, the final endpoint requires a ready server session and rejects legacy direct-intake requests.
 
 ## Deployment
 
-The repository-supported Vercel workflow installs with `npm ci`, builds frontend assets with `npm run build`, serves `dist/`, and deploys `api/audit/analyze.js` as a Node.js function with a 60-second maximum duration. `vercel.json` excludes `/api` paths from the SPA fallback so API requests cannot become HTML. Plain static hosting alone cannot provide analysis. See [Audit backend operations](docs/AUDIT_BACKEND.md) for the mandatory rate-limit and deployment checks before enabling paid model calls.
+The repository-supported Vercel workflow installs with `npm ci`, builds frontend assets with `npm run build`, serves `dist/`, and deploys `api/audit/analyze.js` and `api/audit/interview.js` as Node.js functions with a 60-second maximum duration. `vercel.json` excludes `/api` paths from the SPA fallback so API requests cannot become HTML. Plain static hosting alone cannot provide analysis. See [Audit backend operations](docs/AUDIT_BACKEND.md) for the mandatory rate-limit and deployment checks before enabling paid model calls.
 
 No deployment script, CI workflow, Vercel project link, or automatic Git deployment trigger is checked in. Before releasing, verify the linked Vercel project, production branch/domain, Node version, build command, output directory, and public contact endpoint with the owner. Do not assume a push deploys production. Rebuild from source; tracked `dist/` may be stale and generated changes need separate review.
 
@@ -98,6 +105,6 @@ M2.3 uses a small React LocaleProvider with static English, Netherlands Dutch, G
 
 English is the first-visit default. The header's native language select persists `en`, `nl`, `de`, or `bs` under `bimcode_locale` in localStorage and updates the document language. Blocked storage falls back safely to in-memory selection. Routes are unchanged; About and Contact remain `/#about` and `/#contact`. Locale-prefixed SEO routes/hreflang are a future consideration.
 
-Audit labels, options, explanatory text, and errors are localized at display time. Canonical enum values, payload normalization, and the backend remain unchanged. User-entered content and generated Astra prose are not translated; non-English UI includes an English-assessment note. Multilingual AI output is deferred. Native browser validation UI follows browser settings.
+Audit labels, options, explanatory text, and errors are localized at display time. Canonical enum values and intake normalization remain unchanged. User-entered content and generated Astra prose are not translated; non-English UI includes an English-assessment note. Multilingual AI output is deferred. Native browser validation UI follows browser settings.
 
 Footer destinations live in `src/data/social-links.js`. LinkedIn, X, Instagram, and the owner-supplied XING destination open in new tabs with accessible labels. YouTube is omitted until a verified public channel URL is supplied; the existing homepage video is not a channel URL. Social posting remains manual/approval-based until M7.

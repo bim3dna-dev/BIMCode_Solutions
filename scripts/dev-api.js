@@ -1,11 +1,17 @@
 import { createServer } from "node:http";
 import { Readable } from "node:stream";
 import audit from "../api/audit/analyze.js";
+import interview from "../api/audit/interview.js";
+const routes = {
+  "/api/audit/analyze": audit,
+  "/api/audit/interview": interview,
+};
 
 // Local-only adapter for the same Web Standard handler used by Vercel.
 createServer(async (req, res) => {
   try {
-    if (req.url?.split("?")[0] !== "/api/audit/analyze") {
+    const handler = routes[req.url?.split("?")[0]];
+    if (!handler) {
       res.writeHead(404);
       res.end();
       return;
@@ -17,7 +23,7 @@ createServer(async (req, res) => {
         ? { body: Readable.toWeb(req), duplex: "half" }
         : {}),
     });
-    const response = await audit.fetch(request);
+    const response = await handler.fetch(request);
     res.writeHead(response.status, Object.fromEntries(response.headers));
     res.end(Buffer.from(await response.arrayBuffer()));
   } catch {

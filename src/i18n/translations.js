@@ -345,8 +345,22 @@ Trusted by forward-thinking studios & builders|Vertrouwd door vooruitstrevende b
 Built and maintained for long-running BIM production pipelines.|Ontwikkeld en onderhouden voor langdurige BIM-productieprocessen.|Entwickelt und gepflegt für langfristige BIM-Produktionsprozesse.|Razvijeno i održavano za dugoročne BIM produkcijske procese.
 `;
 
+const interviewRows = `
+Workflow details and interview answers are held temporarily for this assessment, for up to 30 minutes.|Werkprocesdetails en interviewantwoorden worden voor deze beoordeling tijdelijk bewaard, maximaal 30 minuten.|Angaben zum Arbeitsablauf und Interviewantworten werden für diese Bewertung vorübergehend bis zu 30 Minuten gespeichert.|Detalji radnog procesa i odgovori privremeno se čuvaju za ovu procjenu, najviše 30 minuta.
+AI interview questions and assessments are currently generated in English.|AI-interviewvragen en beoordelingen worden momenteel in het Engels gegenereerd.|KI-Interviewfragen und Bewertungen werden derzeit auf Englisch erstellt.|AI pitanja i procjene trenutno se generišu na engleskom jeziku.
+One clarification before the assessment|Een verduidelijking vóór de beoordeling|Eine Klärung vor der Bewertung|Jedno pojašnjenje prije procjene
+Question {number} of up to 4|Vraag {number} van maximaal 4|Frage {number} von höchstens 4|Pitanje {number} od najviše 4
+Include only workflow details. Leave out confidential or personal information.|Vermeld alleen werkprocesdetails. Laat vertrouwelijke of persoonlijke informatie weg.|Geben Sie nur Angaben zum Arbeitsablauf an. Lassen Sie vertrauliche oder personenbezogene Informationen weg.|Navedite samo detalje radnog procesa. Izostavite povjerljive ili lične podatke.
+Continue|Doorgaan|Weiter|Nastavi
+I don’t know / Skip|Ik weet het niet / Overslaan|Ich weiß es nicht / Überspringen|Ne znam / Preskoči
+Restart interview|Interview opnieuw starten|Interview neu starten|Ponovo pokreni intervju
+Retry|Opnieuw proberen|Erneut versuchen|Pokušaj ponovo
+We may ask up to four focused questions before generating your assessment. If your workflow is clear, we will proceed directly.|We stellen zo nodig maximaal vier gerichte vragen voordat we uw beoordeling genereren. Als uw werkproces duidelijk is, gaan we direct verder.|Bei Bedarf stellen wir bis zu vier gezielte Fragen vor Ihrer Bewertung. Ist Ihr Arbeitsablauf klar, fahren wir direkt fort.|Po potrebi postavljamo do četiri konkretna pitanja prije izrade procjene. Ako je vaš radni proces jasan, nastavljamo odmah.
+This interview has expired or could not finish. Please restart the interview.|Dit interview is verlopen of kon niet worden voltooid. Start het interview opnieuw.|Dieses Interview ist abgelaufen oder konnte nicht abgeschlossen werden. Bitte starten Sie es neu.|Ovaj intervju je istekao ili nije mogao biti završen. Pokrenite intervju ponovo.
+Your previous request is still processing. Please wait a moment and retry.|Uw vorige verzoek wordt nog verwerkt. Wacht even en probeer het opnieuw.|Ihre vorherige Anfrage wird noch bearbeitet. Bitte warten Sie kurz und versuchen Sie es erneut.|Vaš prethodni zahtjev se još obrađuje. Sačekajte trenutak i pokušajte ponovo.
+`;
 export const translations = { en: {}, nl: {}, de: {}, bs: {} };
-for (const row of [rows, moreRows, finalRows]
+for (const row of [rows, moreRows, finalRows, interviewRows]
   .map((part) => part.trim())
   .join("\n")
   .split("\n")) {

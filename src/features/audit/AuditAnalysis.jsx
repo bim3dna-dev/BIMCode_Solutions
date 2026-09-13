@@ -1,8 +1,9 @@
 import { useLocale } from "../../i18n/LocaleProvider.jsx";
 import { useEffect, useRef, useState } from "react";
-import { auditResultSchema } from "../../../shared/audit-result.js";
-
-import { analysisErrorMessage, genericError } from "./analysis-errors.js";
+import {
+  createInterviewClient,
+  initialInterviewState,
+} from "./interview-client.js";
 
 const engagementLabels = {
   audit: "Automation Audit",
@@ -13,53 +14,33 @@ const engagementLabels = {
 
 export default function AuditAnalysis({ submission, onBusyChange }) {
   const { t, locale } = useLocale();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
-  const controller = useRef(null);
+  const [state, setState] = useState(initialInterviewState);
+  const { busy, error, result, question, questionNumber, started } = state;
+  const [answer, setAnswer] = useState("");
+  const client = useRef(null);
   const resultHeading = useRef(null);
-  useEffect(
-    () => () => {
-      controller.current?.abort();
+  const questionHeading = useRef(null);
+  useEffect(() => {
+    client.current = createInterviewClient({ submission, onChange: setState });
+    return () => {
+      client.current?.dispose();
       onBusyChange(false);
-    },
-    [onBusyChange],
-  );
+    };
+  }, [submission, onBusyChange]);
+  useEffect(() => {
+    onBusyChange(busy);
+  }, [busy, onBusyChange]);
   useEffect(() => {
     if (result) resultHeading.current?.focus();
   }, [result]);
-
-  const analyze = async () => {
-    if (controller.current) return;
-    const request = new AbortController();
-    controller.current = request;
-    setBusy(true);
-    onBusyChange(true);
-    setError("");
-    const timer = setTimeout(() => request.abort(), 55000);
-    try {
-      const response = await fetch("/api/audit/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submission),
-        signal: request.signal,
-      });
-      if (!response.ok) {
-        setError(await analysisErrorMessage(response));
-        return;
-      }
-      const body = await response.json();
-      const parsed = auditResultSchema.safeParse(body?.result);
-      if (!parsed.success) throw new Error("Invalid assessment");
-      setResult(parsed.data);
-    } catch {
-      setError(genericError);
-    } finally {
-      clearTimeout(timer);
-      controller.current = null;
-      setBusy(false);
-      onBusyChange(false);
-    }
+  useEffect(() => {
+    setAnswer("");
+    if (question) questionHeading.current?.focus();
+  }, [question?.id]);
+  const analyze = () => client.current?.start();
+  const restart = () => {
+    client.current?.restart();
+    setAnswer("");
   };
 
   return (
@@ -69,32 +50,102 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
     >
       {locale !== "en" && (
         <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-          {t("AI assessment is currently generated in English.")}
+          {t(
+            "AI interview questions and assessments are currently generated in English.",
+          )}
         </p>
       )}
       {!result ? (
         <>
-          <h3 className="text-xl font-semibold">
-            {t("Get an automation assessment")}
-          </h3>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            {t(
-              "Analyze this workflow for technical feasibility, possible approaches, risks, and unknowns. This is a first-pass assessment, not a guarantee or an ROI calculation.",
-            )}
-          </p>
-          <p className="mt-3 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
-            {t(
-              "Choosing Analyze Workflow sends your intake to BIMCode's analysis endpoint. Your name, email, company, and role are excluded from the OpenAI request. Workflow text is sent to OpenAI for analysis, so remove confidential or personal information from it first. This does not submit a lead or email anyone.",
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={analyze}
-            disabled={busy}
-            className="btn-primary mt-5 px-6 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {busy ? t("Analyzing workflow…") : t("Analyze Workflow")}
-          </button>
+          {question ? (
+            <div className="max-w-3xl">
+              <h3
+                ref={questionHeading}
+                tabIndex={-1}
+                className="scroll-mt-48 text-xl font-semibold focus:outline-none"
+              >
+                {t("One clarification before the assessment")}
+              </h3>
+              <p className="mt-2 text-sm text-slate-500">
+                {t("Question {number} of up to 4", { number: questionNumber })}
+              </p>
+              <label
+                htmlFor="diagnostic-answer"
+                className="mt-4 block whitespace-pre-wrap break-words font-medium"
+                lang="en"
+              >
+                {question.text}
+              </label>
+              <textarea
+                id="diagnostic-answer"
+                value={answer}
+                onChange={(event) => setAnswer(event.target.value)}
+                maxLength={2000}
+                disabled={busy || !!error}
+                rows={4}
+                className="mt-3 w-full rounded-xl border border-slate-300 bg-transparent p-3 dark:border-slate-600"
+              />
+              <p className="mt-2 text-sm text-slate-500">
+                {t(
+                  "Include only workflow details. Leave out confidential or personal information.",
+                )}
+              </p>
+              {!error && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    className="btn-primary px-5 py-3 disabled:opacity-60"
+                    disabled={busy || !answer.trim()}
+                    onClick={() => client.current?.answer(answer)}
+                  >
+                    {t("Continue")}
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-slate-300 px-5 py-3 disabled:opacity-60 dark:border-slate-600"
+                    disabled={busy}
+                    onClick={() => client.current?.answer("", true)}
+                  >
+                    {t("I don’t know / Skip")}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <h3 className="text-xl font-semibold">
+                {t("Get an automation assessment")}
+              </h3>
+              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {t(
+                  "Analyze this workflow for technical feasibility, possible approaches, risks, and unknowns. This is a first-pass assessment, not a guarantee or an ROI calculation.",
+                )}
+              </p>
+              <p className="mt-3 max-w-3xl text-sm text-slate-500 dark:text-slate-400">
+                {t(
+                  "Choosing Analyze Workflow sends your intake to BIMCode's analysis endpoint. Your name, email, company, and role are excluded from the OpenAI request. Workflow text is sent to OpenAI for analysis, so remove confidential or personal information from it first. This does not submit a lead or email anyone.",
+                )}
+              </p>
+              <p className="mt-3 text-sm text-slate-500">
+                {t(
+                  "Workflow details and interview answers are held temporarily for this assessment, for up to 30 minutes.",
+                )}
+              </p>
+              <p className="mt-3 text-sm text-slate-500">
+                {t(
+                  "We may ask up to four focused questions before generating your assessment. If your workflow is clear, we will proceed directly.",
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={analyze}
+                disabled={busy || !!error}
+                className="btn-primary mt-5 px-6 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {busy ? t("Analyzing workflow…") : t("Analyze Workflow")}
+              </button>
+            </>
+          )}
           {busy && (
             <p
               role="status"
@@ -102,6 +153,16 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
             >
               {t("Reviewing your workflow. This can take up to a minute.")}
             </p>
+          )}
+          {error && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => client.current?.retry()}
+              className="btn-primary mt-4 px-5 py-3"
+            >
+              {t("Retry")}
+            </button>
           )}
           {error && (
             <p
@@ -244,6 +305,16 @@ export default function AuditAnalysis({ submission, onBusyChange }) {
             <span lang="en">{result.recommendedEngagement.rationale}</span>
           </p>
         </>
+      )}
+      {started && (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={restart}
+          className="mt-5 rounded-xl border border-slate-300 px-5 py-3 text-sm disabled:opacity-60 dark:border-slate-600"
+        >
+          {t("Restart interview")}
+        </button>
       )}
     </section>
   );

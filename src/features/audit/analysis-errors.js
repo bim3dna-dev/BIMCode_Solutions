@@ -1,10 +1,21 @@
 export const genericError =
   "Analysis is temporarily unavailable. Your workflow details have not been lost; please try again.";
 const errorMessages = {
+  INTERVIEW_EXPIRED:
+    "This interview has expired or could not finish. Please restart the interview.",
+  INTERVIEW_FAILED:
+    "This interview has expired or could not finish. Please restart the interview.",
+  INTERVIEW_CONFLICT:
+    "This interview has expired or could not finish. Please restart the interview.",
+  INTERVIEW_NOT_READY:
+    "This interview has expired or could not finish. Please restart the interview.",
+  INTERVIEW_BUSY:
+    "Your previous request is still processing. Please wait a moment and retry.",
   INVALID_INPUT:
     "Please edit your workflow and check the required fields and numeric values.",
   PAYLOAD_TOO_LARGE: "Please shorten your workflow description and try again.",
-  RATE_LIMITED: "You've reached the analysis limit. Please wait a few minutes and try again.",
+  RATE_LIMITED:
+    "You've reached the analysis limit. Please wait a few minutes and try again.",
   ANALYSIS_REFUSED:
     "We could not assess this workflow. Please edit its description or request a manual review.",
 };

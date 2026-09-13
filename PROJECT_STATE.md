@@ -1,6 +1,6 @@
 # BIMCode Solutions — Project State
 
-Current status: **M2.3 COMPLETE locally, awaiting review**. M2.2 Production activation remains complete. M3 not started.
+Current status: **M3 implemented locally; offline validation complete; manual live/Preview validation PENDING**. M2.2 Production activation remains complete. M2.3 is complete and pushed at `03daf99`. M3 changes are uncommitted/unpushed. M4 has not started.
 
 ## Metadata
 
@@ -68,7 +68,7 @@ Implemented locally: POST `/api/audit/analyze`, official OpenAI Responses SDK, s
 
 ### M3 — Dynamic Diagnostic Interview
 
-Not started. Ask only questions needed to resolve ambiguity in workflow analysis. Account for BIM/AEC and Revit workflow constraints.
+Implemented locally with a server-owned, bounded interview and unchanged final assessment schema. Manual live/Preview validation and M3 Production activation remain pending; see the M3 handoff below.
 
 ### M4 — Automation Report and ROI Engine
 
@@ -459,3 +459,30 @@ Audit regression: per-locale synthetic forms normalize to unchanged Mechanical/w
 Known scope limits: Astra generated prose remains English; multilingual AI output and locale-prefixed SEO routes are future enhancements. No speculative hreflang. Static translations are ready for owner review; no independent native-speaker sign-off is claimed. Public YouTube channel URL is missing.
 
 Exact next action: review wording and layout in all four locales and the supplied social destinations; provide a verified public YouTube channel URL if one should be added. M2.3 remains uncommitted/unpushed for review. Next milestone is M3 Dynamic diagnostic interview / follow-up questioning, not started.
+
+
+## M3 Dynamic Diagnostic Interview handoff (2026-09-13)
+
+M3 implementation: **COMPLETE locally**. Offline validation: **PASS**. Live Astra interview validation: **PENDING**. Preview store/WAF/end-to-end validation: **PENDING**. M3 Production activation: **PENDING; not enabled or deployed**. M2.2 Production and M2.3 localization/social work remain complete; M2.3 was committed/pushed at `03daf99`, superseding its prior local-review snapshot. **M4 Deterministic ROI / effort / payback engine is not started.**
+
+Architecture: review -> POST `/api/audit/interview` -> zero to four focused questions -> POST `/api/audit/analyze` -> existing assessment. Both endpoints reuse the secure HTTP boundary. A 30-minute shared Redis REST session owns minimized workflow/history, question IDs, phases, reserved call counts and cached result. Atomic compare-and-set prevents simultaneous/replayed requests from generating duplicate provider calls. An external store is needed to enforce this across serverless instances; there is no in-process production fallback. Contact identity is removed before storage/model calls. Original intake is preserved on restart.
+
+Strict decision contract: status (`needs_clarification` or `ready_for_assessment`) plus nullable question (`text`, short internal `reason`, fixed enum `topic`). The server validates the combination and single-question punctuation, creates question IDs, and omits reason/topic from public replies. Prior topics and normalized duplicate questions cannot repeat; skipped/unknown responses remain unresolved evidence. The final `auditResultSchema` is unchanged and receives compact validated answers. Semantic question quality is a live review gate, not proven by schema tests.
+
+Limits: **4 questions, 4 decision calls, 1 final assessment call per session**; after answer four there is no extra decision. `gpt-6-astra`, low reasoning/verbosity, 600 decision output tokens/15-second timeout versus 4,000 final output tokens/45-second timeout, no SDK retries/tools/search. Zero-question path uses two model calls; maximum path uses five. Reservation failures/outages fail closed; a crashed worker may require a fresh interview rather than another paid call on the same session.
+
+Frontend: one question/textarea, deterministic question count, localized Continue/Skip/Retry/Restart, duplicate-request lock, preserved intake, controlled error handling, English model-content notice and temporary-state notice. Static UI supports en/nl/de/bs; canonical values and English generated prose stay unchanged. Product event names/triggers are documented for future analytics without a vendor or personal payloads.
+
+WAF blocker: existing `rate-limit-audit-analysis` remains externally configured for POST `/api/audit/analyze`, Fixed Window, **3 / 600 seconds / IP**, 429. Add `rate-limit-audit-interview` for exact POST `/api/audit/interview`, Fixed Window, **18 / 600 seconds / IP**, 429. Maximum completion is five interview requests plus one final request; 18 allows three full interviews (15 requests) and one retry per audit (3). Retain final limit3. Ensure broader rules do not still impose3 on interview. No WAF changes performed; configure/verify on Preview before M3 enablement. New `AUDIT_INTERVIEW_ENABLED=false` is the safe default. Private Preview state-store variables are required; no environment values were inspected or modified.
+
+Created source/test files: `api/audit/interview.js`; `shared/audit-interview.js`; `server/audit/interview-service.js`, `interview-store.js`, `interview.test.js`; `src/features/audit/interview-client.js`, `interview-client.test.js`.
+
+Modified: `.env.example`, `vercel.json`, `scripts/dev-api.js`, `server/audit/handler.js`, `handler.test.js`, `provider.js`, `src/features/audit/AuditAnalysis.jsx`, `analysis-errors.js`, `src/i18n/translations.js`, README, this state file, docs/AUDIT_BACKEND.md, and tracked generated dist assets. No dependency/package-lock changes. The external Redis REST service is a new infrastructure requirement, not an installed package.
+
+Validation: baseline26 tests passed before changes; now **45 offline tests PASS**. Tests cover zero/one/multiple questions, max turns/calls, duplicate topics/text, skip/unknowns, invalid decision/answer payloads, identity minimization/canonical enums, final answer context, concurrent/replayed requests, storage outage, expiry, strict SDK transport, restart/stale responses, HTML429 and non-JSON failures. Production build PASS with existing browser-data and Zod annotation warnings. `npm run lint` remains blocked by the pre-existing missing ESLint configuration; no new lint success is claimed. Routing normalization PASS, including both API endpoints excluded from SPA fallback. git diff --check PASS. Repository/generated-asset secret-pattern scan PASS; no server prompt/config names in browser assets. `.env.local` remains ignored/untracked; contents were not read. No real OpenAI or Redis calls were made.
+
+Browser regression: **PASS** against the built site using the existing temporary Playwright/Edge installation, no new repository dependency. All en/nl/de/bs routes (home, solutions, case study, blog/detail, audit, About/Contact anchors and existing not-found paths) passed at widths360/768/1280/1440. Each locale passed two-question answer/Skip, submission locking, English final rendering, restart/intake preservation, HTML429, contact email-app fallback and footer links. Keyboard language selection/refresh persistence passed; known static catalog gaps on rendered pages: none. English mobile interview screenshot inspected without clipping. Earlier development-server runs were interrupted by hot reload/timing-sensitive assertions; the final built-site run used an explicitly held mocked response for deterministic busy-state checks and passed all locales. No live API or contact delivery was exercised.
+
+Git: work based on clean `main` at `03daf99`, synchronized with origin/main. M3 changes intentionally remain uncommitted/unpushed for review; no remote/deployment changes. Generated dist asset replacement is intentional under the existing tracking policy.
+
+Exact next action: review M3 diff, then prepare an isolated Preview with a separate Redis REST store, verify atomic reservation/expiry, configure both exact WAF rules and stable origin, enable M3 in Preview only, and deliberately run the two synthetic workflows in [M3 manual validation](docs/AUDIT_BACKEND.md#m3-dynamic-diagnostic-interview). Record real turns, per-call/cumulative latency, safe token usage, total usage, question usefulness, schema/architecture quality, WAF and browser evidence. Do not release M3 to Production or start M4 before that review.

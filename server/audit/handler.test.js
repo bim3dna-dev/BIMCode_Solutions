@@ -378,39 +378,88 @@ test("usage missing values are safe and routing excludes API from SPA fallback",
     await readFile(new URL("../../vercel.json", import.meta.url), "utf8"),
   );
   const fallback = new RegExp(`^${config.rewrites[0].source}$`);
-  for (const path of ["/api", "/api/audit/analyze", "/api/unknown"])
+  for (const path of [
+    "/api",
+    "/api/audit/analyze",
+    "/api/audit/interview",
+    "/api/unknown",
+  ])
     assert.equal(fallback.test(path), false);
   for (const path of ["/", "/audit", "/solutions", "/case-study", "/blog/slug"])
     assert.ok(fallback.test(path));
   const endpoint = await import("../../api/audit/analyze.js");
   assert.equal(typeof endpoint.default.fetch, "function");
+  const interviewEndpoint = await import("../../api/audit/interview.js");
+  assert.equal(typeof interviewEndpoint.default.fetch, "function");
 });
 
-
 test("exact localhost, preview and production origins work without accepting other origins", async () => {
-  for (const origin of ["http://localhost:5173", "https://bimcode-preview.vercel.app", "https://www.bimcodesolutions.com"]) {
-    const { handler, calls } = harness(undefined, { ...env, AUDIT_ALLOWED_ORIGIN: origin });
-    assert.equal((await handler(request(undefined, { origin, "sec-fetch-site": "same-origin" }))).status, 200);
-    assert.equal((await handler(request(undefined, { origin: origin + ".evil.example" }))).status, 403);
+  for (const origin of [
+    "http://localhost:5173",
+    "https://bimcode-preview.vercel.app",
+    "https://www.bimcodesolutions.com",
+  ]) {
+    const { handler, calls } = harness(undefined, {
+      ...env,
+      AUDIT_ALLOWED_ORIGIN: origin,
+    });
+    assert.equal(
+      (
+        await handler(
+          request(undefined, { origin, "sec-fetch-site": "same-origin" }),
+        )
+      ).status,
+      200,
+    );
+    assert.equal(
+      (await handler(request(undefined, { origin: origin + ".evil.example" })))
+        .status,
+      403,
+    );
     assert.equal(calls.length, 1);
   }
 });
 
 test("custom interval and minute units retain their operational meaning without derived totals", () => {
   const input = validInput();
-  input.workflow.frequency = { type: "custom", occurrences: 2, intervalDays: 14 };
-  input.workflow.manualEffort = { duration: 90, unit: "minutes", basis: "per-person-per-occurrence" };
+  input.workflow.frequency = {
+    type: "custom",
+    occurrences: 2,
+    intervalDays: 14,
+  };
+  input.workflow.manualEffort = {
+    duration: 90,
+    unit: "minutes",
+    basis: "per-person-per-occurrence",
+  };
   const model = toModelWorkflow(auditInputSchema.parse(input));
   assert.deepEqual(model.frequency, input.workflow.frequency);
   assert.deepEqual(model.manualEffort, input.workflow.manualEffort);
-  for (const field of ["annualHours", "laborCost", "savings", "roi", "payback"]) {
+  for (const field of [
+    "annualHours",
+    "laborCost",
+    "savings",
+    "roi",
+    "payback",
+  ]) {
     assert.equal(field in model, false);
-    assert.equal(auditResultSchema.safeParse({ ...validResult(), [field]: 100 }).success, false);
+    assert.equal(
+      auditResultSchema.safeParse({ ...validResult(), [field]: 100 }).success,
+      false,
+    );
   }
 });
 
 test("usage rejects invalid counts and never spreads provider or customer data", () => {
-  const usage = safeUsage({ secret: "private", usage: { input_tokens: -1, output_tokens: "80", total_tokens: Infinity, output_tokens_details: { reasoning_tokens: NaN } } });
+  const usage = safeUsage({
+    secret: "private",
+    usage: {
+      input_tokens: -1,
+      output_tokens: "80",
+      total_tokens: Infinity,
+      output_tokens_details: { reasoning_tokens: NaN },
+    },
+  });
   assert.equal(usage.inputTokens, null);
   assert.equal(usage.outputTokens, null);
   assert.equal(usage.reasoningTokens, null);

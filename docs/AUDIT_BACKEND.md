@@ -1,8 +1,110 @@
 # Audit backend operations
 
-Current status: **M2.2 Production activation COMPLETE**; owner-reported Production smoke test PASS. See the closure evidence at the end. Earlier milestone sections preserve historical status. M3 not started.
+Current status: **M3 implemented locally; offline validation complete; live/Preview validation PENDING**. Existing M2.2 Production activation remains complete. M3 is not deployed or enabled. The M3 section below supersedes the earlier one-shot architecture; earlier milestone sections preserve historical evidence.
 
-## Architecture and contracts
+## M3 Dynamic Diagnostic Interview
+
+### Architecture and deployment gate
+
+Intake/review remains local. Analyze starts a diagnostic session; zero questions is valid. Each answer either yields one material BIM-specific question or signals readiness. The browser then requests the existing structured final assessment. There is no generic chat endpoint, conversation transcript, account, financial arithmetic, or M4 implementation.
+
+**Do not deploy this M3 frontend to Production yet.** Its interview route needs shared state and revised external WAF protection. `AUDIT_INTERVIEW_ENABLED` defaults to false and no deployment configuration has been changed here. M2 Production remains as previously activated. When M3 is disabled, the legacy M2 analyze request still works; when enabled, analyze accepts only a ready interview ID, preventing direct-intake bypass of interview state.
+
+New server-only setup: configure `AUDIT_STATE_REDIS_REST_URL` (HTTPS root endpoint) and `AUDIT_STATE_REDIS_REST_TOKEN` (read/write token) for an Upstash-compatible Redis REST store supporting GET and atomic Lua EVAL/SET/EX. Use separate stores for Preview and Production, with access restricted to the backend. Existing analysis enablement, server key, model and exact-origin checks still apply. No Redis package was added. The adapter uses the documented [REST command-array format](https://upstash.com/docs/redis/features/restapi#post-command-in-body) and [EVAL](https://upstash.com/docs/redis/sdks/ts/commands/scripts/eval). The real service connection, Lua execution and expiry require Preview validation; offline transport tests do not prove provisioning.
+
+### Endpoints and contracts
+
+Both routes share POST-only handling, exact origin and same-origin fetch metadata checks, JSON-only/32 KiB request limits, safe error envelopes, disabled defaults and secret isolation. Both Vercel functions have a 60-second ceiling.
+
+| Endpoint | Strict request | Result |
+| --- | --- | --- |
+| POST `/api/audit/interview` | `{action: "start", requestId: UUID, input: normalizedIntake}` | One question or ready state |
+| POST `/api/audit/interview` | `{action: "answer", interviewId: UUID, questionId: UUID, answer: string, skipped: boolean}` | Next question or ready state |
+| POST `/api/audit/analyze` with M3 enabled | `{interviewId: UUID}` | Existing `{result: auditResultSchema}` |
+
+The browser generates one random UUID per start attempt and reuses it on retry. It is the session's unguessable bearer identifier, not trusted history; never place it in URLs or analytics. The server generates question IDs. A caller cannot supply previous questions, topics, answers, limits, model configuration, or result state. Answer text is trimmed and limited to 2,000 characters. Explicit skip requires empty answer text; non-skip requires nonempty text. Common English “don't know”, “not sure”, “unknown” and “skip” answers normalize to skipped unknowns. The localized Skip button is language-independent.
+
+The strict Structured Output decision root is `{status, question}`. Status is `needs_clarification` or `ready_for_assessment`. `question` is null when ready; otherwise it is `{text, reason, topic}` with 10–300 character text, 1–240 character concise operational justification and a fixed topic enum. The SDK generates strict JSON Schema; independent server validation checks the status/null relationship and exactly one terminal question mark. Prompt instructions prohibit compound interrogations. Semantic question quality remains a manual gate; punctuation validation alone cannot guarantee it.
+
+Topics: `rules_and_exceptions`, `parameters`, `connectors`, `linked_models`, `views_and_tags`, `tolerances`, `worksharing`, `mutation_authority`, `revit_version`, `deployment`, `volume`, `approval`. A previously visited topic, including skipped topics, cannot be asked again. Normalized duplicate question text is also rejected. A duplicate decision proceeds to assessment without another selection call. This conservative policy does not revisit an ambiguous answer on the same topic; unresolved details must appear in final unknowns. Cross-topic semantic paraphrases still need live quality review.
+
+Public replies contain only `{interviewId, status, question: {id, text} | null, questionNumber}`. The operational reason is neither returned, logged, nor retained. It is not a request for chain-of-thought. Progress is a real count, “Question N of up to 4”.
+
+### Server-owned state and retry guarantees
+
+The Redis key holds the minimized operational workflow, structured answers (`questionId`, `topic`, `question`, `answer`, `skipped`), pending server question, decision/final call counts, absolute expiry, phase and cached final result. Contact name/email/company/role are excluded before storage or provider access. Free text is not automatically anonymized. The UI explains temporary retention and asks users to omit sensitive information.
+
+State expires 30 minutes after creation; updates do not extend its absolute lifetime. Browser state is memory-only. Restart clears the browser question/answer/result and allocates a fresh start ID on the next explicit Analyze action, preserving original intake. Abandoned server sessions remain until expiry. Redis provider backups/retention are a separate infrastructure setting to review; TTL is application data expiry, not a claim of immediate deletion from backups.
+
+Phases are `working`, `question`, `ready`, `complete`, `failed`. An atomic compare-and-set Lua operation reserves each call **before** invoking Astra. Concurrent requests lose the reservation and receive 409; identical completed retries reuse state/result. Conflicting answers or changed intake under the same ID are rejected. No process-memory fallback is used in production. Store outages fail closed before a new call. If a worker dies or saving fails after a reserved call, the reservation is not released for a second paid attempt: the user may need a fresh interview. Busy/failed sessions never silently retry provider calls. Session expiry or restart creates a new audit budget, still governed by WAF; this is not an authenticated per-person lifetime quota.
+
+### Provider and cost/latency limits
+
+`decideNextAuditQuestion(workflow, answers, model)` and `generateAuditAssessment(workflow, answers, model)` remain behind the server provider boundary. They receive an allowlisted workflow and compact structured diagnostic answers, not contact identity, internal IDs or a transcript. The existing `auditResultSchema` is unchanged. Final instructions use answers as evidence and preserve skipped/unresolved unknowns; deterministic Revit rules, read-only inspection, controlled corrections, transactions, rollback and worksharing remain explicit constraints.
+
+| Limit | Diagnostic decision | Final assessment |
+| --- | --- | --- |
+| Model | `gpt-6-astra` | `gpt-6-astra` |
+| Reasoning / verbosity | low / low | low / low |
+| Maximum output tokens | 600 | 4,000 |
+| SDK timeout | 15 seconds | 45 seconds |
+| SDK retries | 0 | 0 |
+| Maximum calls per session | 4 | 1 |
+
+No tools/search/background execution or stored Responses retrieval is enabled. A single decision both evaluates sufficiency and selects the next question. After answer four, the server makes no fifth decision: it marks ready directly. Zero questions takes two model calls; the longest path takes at most five. Maximum configured output allowance is 6,400 tokens per session, not predicted usage or a price quote. Input usage grows with bounded answer history. The previously measured approximately 20-second M2 assessment is historical, not M3 latency evidence. Real decision latency, cumulative wait, truncation risk at 600 output tokens and qualitative usefulness are **PENDING** manual measurement. Do not increase caps or rewrite prompts just for style before measuring.
+
+Safe logs include event (`audit_interview_usage` or `audit_usage`), elapsed milliseconds, model and token counts. No question, answer, identity, request object, session ID, key or provider error details are logged. Browser errors retain the localized 429 limit message even for HTML WAF responses; provider/server failures remain temporarily unavailable. Expiry/failed-session errors offer restart, busy reservations offer manual retry. No firewall details appear in user messages.
+
+### Exact WAF recommendation — external changes still pending
+
+The existing final-analysis rule remains configured at 3 requests / 600 seconds / IP. A maximum interview needs **five interview HTTP requests** (start plus four answers), then **one final request**. A combined three-request cap would prevent completion. Separate the paths; verify no broader lower-limit rule still blocks the interview path.
+
+| Parameter | New interview rule | Existing final rule |
+| --- | --- | --- |
+| Name | `rate-limit-audit-interview` | `rate-limit-audit-analysis` |
+| Path, exact | `/api/audit/interview` | `/api/audit/analyze` |
+| Method | POST | POST |
+| Strategy | Fixed Window | Fixed Window |
+| Limit | **18 requests** | **3 requests** |
+| Window | 600 seconds | 600 seconds |
+| Counting key | IP Address | IP Address |
+| Action | Too Many Requests (429) | Too Many Requests (429) |
+
+Rationale: three complete audits allowed by the final rule need 3 × 5 = 15 interview requests; one retry allowance per audit adds three, giving 18. Keep the expensive final allowance unchanged; a final request retry consumes one of its slots even if cached. These limits are per-IP abuse controls, not proof of identity; shared-office IPs share the budget. A malicious caller can spend interview allowance on fresh starts, so approve the overall spend budget and retain provider alerts. No WAF rule has been changed by code or this task. Apply and verify both rules in Preview first, including stable alias access, before enabling the M3 route; repeat deliberately for Production after sign-off.
+
+### Manual live/Preview procedure (explicit, billable, not run automatically)
+
+1. Review the uncommitted diff. Create an isolated Preview deployment rather than pushing this frontend to Production. Privately configure a separate state store and server-only credentials. Keep Production unchanged. Test store GET/CAS/expiry with synthetic data; check concurrent reservations and fail-closed behavior.
+2. Configure both WAF rules above for Preview and record the exact stable hostname. Set `AUDIT_ALLOWED_ORIGIN` to its exact HTTPS origin, `OPENAI_MODEL=gpt-6-astra`, and both analysis/interview enable flags to `true` in Preview only. Redeploy that environment. Never put server credentials in VITE variables or reports.
+3. On `/audit`, enter a synthetic ambiguous workflow: “A team manually checks Revit piping models for disconnected elements and tagging problems.” Use synthetic contact fields and ordinary operational values. Analyze explicitly. Answer using known synthetic constraints, e.g. intentional equipment endpoints, designated issue views and report-only correction authority. Use Skip once if asked about an unknown. Confirm one material question at a time, no repeated topics, no more than four questions, then a valid assessment.
+4. In a second audit, use a detailed synthetic workflow: “In Revit 2025, inspect host-model mechanical piping in the named ISSUE-MEP coordination view only. Flag unconnected pipe connectors except endpoints whose approved QA_EndCondition instance parameter is Equipment or FuturePhase. Flag visible pipes missing tags in that view. Exclude linked models. Use deterministic rules and read-only reporting of element IDs. A BIM lead reviews the report; no automated edits are authorized. The model has about 5,000 pipes, uses worksharing, and the command runs interactively in pyRevit with valid Revit API context.” Confirm the model may proceed without clarification; a question is acceptable only if it materially changes the recommendation. Do not force zero with an undocumented client override.
+5. Record each diagnostic turn's latency and safe input/output/cached/reasoning/total tokens, final latency/tokens, summed token usage and cumulative user wait. Note whether each question materially improved scope, deterministic rules, risk or architecture. Evaluate one-question quality, known/unknown handling, read-only-first design and no financial arithmetic/guarantees/unsupported claims. These measurements remain blank until observed, not copied from M2.
+6. Verify browser → Preview Function → Astra → UI, cached retry/concurrency, restart/intake preservation, all four UI locales, mobile layout and HTML 429 handling. Confirm a blocked WAF request causes no normal model invocation, using firewall/function logs. Avoid unnecessary paid calls just to fill a limit; plan synthetic allowed traffic and review existing counters. Verify secrets are absent from browser assets and responses without copying values into reports.
+7. Record Preview hostname, store validation, WAF evidence, model measurements and qualitative sign-off in PROJECT_STATE. Only then request a separate Production release/activation instruction. M4 remains unstarted.
+
+The existing `npm run test:live` remains the explicit M2 provider smoke test, not an M3 interview test. Normal `npm test` uses only mocks; no real Redis or OpenAI call is made. No M3 live test has been performed by Codex.
+
+### M3 offline validation record
+
+45 deterministic tests PASS; production build PASS; both API routes excluded from normalized SPA rewrites; diff/new-file whitespace checks PASS; repository/generated-asset secret-pattern scan PASS. Browser assets contain no server prompt/configuration code. `.env.local` is ignored and untracked, checked through Git metadata without reading its contents. Existing missing ESLint configuration still prevents `npm run lint`; browser-data/Zod build warnings are pre-existing. No package or lockfile changes.
+
+The built-site mocked browser run passed en/nl/de/bs across public routes and 360/768/1280/1440px widths, two-question answer/Skip/final/restart behavior, canonical payloads, submission locking, HTML429, contact fallback, social links and language persistence. Live provider/store/WAF/Preview measurements remain PENDING. No automatic paid call or deployment was performed.
+
+### Future analytics event contract (documented, no vendor/emitter added)
+
+| Event | Deterministic trigger | Allowed future payload |
+| --- | --- | --- |
+| AUDIT_STARTED | Explicit Analyze starts a fresh interview | schema version only |
+| INTERVIEW_QUESTION_SHOWN | A new server question renders, once per question | question number |
+| INTERVIEW_ANSWERED | Non-skip answer accepted | question number |
+| INTERVIEW_SKIPPED | Skip/unknown accepted | question number |
+| ASSESSMENT_GENERATED | Validated final result first renders | question count |
+| ASSESSMENT_FAILED | A controlled failed request is shown | stage and controlled error category |
+| INTERVIEW_RESTARTED | Explicit restart clears diagnostic state | prior question count |
+
+Never include intake, answers, question text, contact identity, bearer/session IDs or raw error messages. Future emitters should deduplicate accepted/rendered transitions on retries. No analytics service, lead submission or social publishing is introduced.
+
+## M2 architecture and contracts (historical baseline)
 
 `POST /api/audit/analyze` runs as a Vercel Node.js Web Standard function (`export default { fetch }`). Shared schemas are in `shared/`; server-only code is in `server/audit/`. No Express, database, persistent sessions, or authentication service is introduced. The local Node HTTP adapter calls the same handler; Vite proxies `/api` in development only.
 

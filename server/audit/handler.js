@@ -1,6 +1,12 @@
 import { auditInputSchema } from "../../shared/audit-input.js";
 import { auditResultSchema } from "../../shared/audit-result.js";
 import {
+  interviewRequestSchema,
+  interviewAssessmentSchema,
+} from "../../shared/audit-interview.js";
+import { createInterviewStore } from "./interview-store.js";
+import { createInterviewService, InterviewError } from "./interview-service.js";
+import {
   createProvider,
   DEFAULT_MODEL,
   safeUsage,
@@ -85,6 +91,8 @@ async function readJson(request) {
 
 export function createAuditHandler({
   env = process.env,
+  operation = "analyze",
+  storeFactory = createInterviewStore,
   providerFactory = createProvider,
   log = (metadata) => console.info(JSON.stringify(metadata)),
 } = {}) {
@@ -148,7 +156,18 @@ export function createAuditHandler({
     } catch (error) {
       return failure(error.status, error.code, error.message);
     }
-    const parsed = auditInputSchema.safeParse(input);
+    const interviewMode =
+      operation === "interview" ||
+      env.AUDIT_INTERVIEW_ENABLED === "true" ||
+      Object.hasOwn(input ?? {}, "interviewId");
+    if (interviewMode && env.AUDIT_INTERVIEW_ENABLED !== "true")
+      return failure(503, "UNAVAILABLE");
+    const schema = interviewMode
+      ? operation === "interview"
+        ? interviewRequestSchema
+        : interviewAssessmentSchema
+      : auditInputSchema;
+    const parsed = schema.safeParse(input);
     if (!parsed.success)
       return failure(
         400,
@@ -156,6 +175,20 @@ export function createAuditHandler({
         "Please review the required fields, lengths, and numeric values, then try again.",
       );
     try {
+      if (interviewMode) {
+        const service = createInterviewService({
+          store: storeFactory(env),
+          provider: providerFactory(env.OPENAI_API_KEY),
+          model: env.OPENAI_MODEL?.trim() || DEFAULT_MODEL,
+          log,
+        });
+        return reply(
+          200,
+          operation === "interview"
+            ? await service.interview(parsed.data)
+            : await service.assess(parsed.data.interviewId),
+        );
+      }
       const response = await providerFactory(env.OPENAI_API_KEY).analyze(
         toModelWorkflow(parsed.data),
         env.OPENAI_MODEL?.trim() || DEFAULT_MODEL,
@@ -182,6 +215,8 @@ export function createAuditHandler({
       }
       return reply(200, { result: result.data });
     } catch (error) {
+      if (error instanceof InterviewError)
+        return failure(error.status, error.code);
       const status = Number.isInteger(error?.status) ? error.status : null;
       const timeout = ["APIConnectionTimeoutError", "AbortError"].includes(
         error?.name,
