@@ -7,7 +7,7 @@ import { validInput } from "./fixtures.js";
 import { analysisErrorMessage } from "../../src/features/audit/analysis-errors.js";
 
 const env = {
-  VERCEL: "1", AUDIT_ANALYSIS_ENABLED: "true", AUDIT_INTERVIEW_ENABLED: "true",
+  VERCEL: "1", VERCEL_ENV: "preview", AUDIT_ANALYSIS_ENABLED: "true", AUDIT_INTERVIEW_ENABLED: "true",
   OPENAI_API_KEY: "unit-test-placeholder", AUDIT_ALLOWED_ORIGIN: "https://example.com",
   AUDIT_STATE_REDIS_REST_URL: "https://redis.example", AUDIT_STATE_REDIS_REST_TOKEN: "unit-test-placeholder",
 };
@@ -25,7 +25,7 @@ function harness() {
     const [command, scriptOrKey, , key, ...args] = JSON.parse(options.body);
     if (command === "GET") { stateAccesses++; return Response.json({ result: sessions.get(scriptOrKey) ?? null }); }
     assert.equal(command, "EVAL");
-    if (key.startsWith("bimcode:audit:m3:rate:interview:")) {
+    if (key.includes(":rate:interview:")) {
       assert.deepEqual(args, ["18", "600"]);
       assert.match(scriptOrKey, /redis.call\('INCR'/);
       assert.match(scriptOrKey, /redis.call\('EXPIRE'/);
@@ -41,8 +41,8 @@ function harness() {
     if ((sessions.get(key) ?? "") !== args[0]) return Response.json({ result: 0 });
     sessions.set(key, args[1]); return Response.json({ result: 1 });
   };
-  const handler = () => createAuditHandler({
-    env, operation: "interview", storeFactory: () => createInterviewStore(env, fetcher),
+  const handler = (environment = "preview") => createAuditHandler({
+    env: { ...env, VERCEL_ENV: environment }, operation: "interview", storeFactory: () => createInterviewStore({ ...env, VERCEL_ENV: environment }, fetcher),
     providerFactory: () => { providerCalls++; return { decideNextAuditQuestion: async () => ({ status: "completed", output_parsed: { status: "ready_for_assessment", question: null } }) }; },
     log: () => {},
   });
@@ -115,4 +115,42 @@ test("only Vercel's single valid IP is trusted; alternate headers cannot change 
   assert.equal(interviewClientIp(request("2001:db8::1"), env), interviewClientIp(request("2001:0db8:0:0:0:0:0:1"), env));
   for (let i = 0; i < 18; i++) await h.handler()(request());
   assert.equal((await h.handler()(request("192.0.2.1", { "x-forwarded-for": "192.0.2.99" }))).status, 429);
+});
+
+
+test("Preview and Production share Redis but isolate counters and identical session/cache IDs", async () => {
+  const h = harness();
+  for (let i = 0; i < 18; i++) assert.equal((await h.handler("preview")(request())).status, 200);
+  assert.equal((await h.handler("preview")(request())).status, 429);
+  assert.equal((await h.handler("production")(request())).status, 200);
+  assert.equal(h.counters.size, 2);
+  assert.ok([...h.counters.keys()].some((key) => key.startsWith("bimcode:audit:m3:preview:rate:interview:")));
+  assert.ok([...h.counters.keys()].some((key) => key.startsWith("bimcode:audit:m3:production:rate:interview:")));
+
+  const values = new Map();
+  const transport = async (_url, options) => {
+    const args = JSON.parse(options.body);
+    if (args[0] === "GET") return Response.json({ result: values.get(args[1]) ?? null });
+    assert.equal(args[0], "EVAL");
+    assert.ok(Number(args[6]) > 0 && Number(args[6]) <= 1800);
+    if ((values.get(args[3]) ?? "") !== args[4]) return Response.json({ result: 0 });
+    values.set(args[3], args[5]); return Response.json({ result: 1 });
+  };
+  const preview = createInterviewStore(env, transport);
+  const production = createInterviewStore({ ...env, VERCEL_ENV: "production" }, transport);
+  const id = randomUUID();
+  const state = { phase: "complete", result: { summary: "Preview cached assessment" }, expiresAt: Date.now() + 1800000 };
+  assert.equal(await preview.cas(id, null, state), true);
+  assert.equal(await production.get(id), null);
+  const prodState = { ...state, result: { summary: "Production cached assessment" } };
+  assert.equal(await production.cas(id, null, prodState), true);
+  assert.deepEqual(await preview.get(id), state);
+  assert.deepEqual(await production.get(id), prodState);
+  assert.deepEqual([...values.keys()], [`bimcode:audit:m3:preview:${id}`, `bimcode:audit:m3:production:${id}`]);
+});
+
+test("missing or unknown deployed environment fails closed without Redis access", () => {
+  for (const environment of [undefined, "", "unknown", "preview:production"]) {
+    assert.throws(() => createInterviewStore({ ...env, VERCEL_ENV: environment }, () => { throw new Error("Must not connect"); }), /State environment unavailable/);
+  }
 });

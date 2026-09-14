@@ -31,6 +31,10 @@ end
 return 0`;
 
 export function createInterviewStore(env, fetcher = fetch) {
+  const environment = env.VERCEL_ENV ?? (env.VERCEL === "1" ? null : "development");
+  if (!["production", "preview", "development"].includes(environment))
+    throw new Error("State environment unavailable");
+  const namespace = `bimcode:audit:m3:${environment}`;
   const url = new URL(env.AUDIT_STATE_REDIS_REST_URL || "invalid:");
   if (
     url.protocol !== "https:" ||
@@ -58,12 +62,12 @@ export function createInterviewStore(env, fetcher = fetch) {
       throw new Error("State store unavailable");
     return body.result;
   };
-  const key = (id) => `bimcode:audit:m3:${id}`;
+  const key = (id) => `${namespace}:${id}`;
   return {
     consumeInterviewRequest: async (ip) => {
       const digest = createHash("sha256").update(ip).digest("hex");
       const result = await command([
-        "EVAL", rateScript, "1", `bimcode:audit:m3:rate:interview:${digest}`,
+        "EVAL", rateScript, "1", `${namespace}:rate:interview:${digest}`,
         String(INTERVIEW_RATE_LIMIT), String(INTERVIEW_RATE_WINDOW_SECONDS),
       ]);
       if (!Array.isArray(result) || result.length !== 2 ||
