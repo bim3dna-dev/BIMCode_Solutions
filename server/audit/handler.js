@@ -112,27 +112,44 @@ export function createAuditHandler({
     )
       return failure(503, "UNAVAILABLE");
     let allowedOrigin;
+    const configuredOrigin = env.AUDIT_ALLOWED_ORIGIN.trim();
+    // TEMPORARY: remove after Preview origin diagnosis. Never log other headers or input.
+    const logOriginMismatch = () => {
+      const origin = request.headers.get("origin");
+      log({
+        event: "audit_origin_diagnostic",
+        requestOrigin: JSON.stringify(origin),
+        configuredOrigin: JSON.stringify(env.AUDIT_ALLOWED_ORIGIN),
+        requestOriginLength: origin?.length ?? 0,
+        configuredOriginLength: env.AUDIT_ALLOWED_ORIGIN.length,
+        strictEquality: origin === env.AUDIT_ALLOWED_ORIGIN,
+        trimmedEquality: origin === configuredOrigin,
+      });
+    };
     try {
-      const configured = new URL(env.AUDIT_ALLOWED_ORIGIN);
+      const configured = new URL(configuredOrigin);
       if (
         !["http:", "https:"].includes(configured.protocol) ||
-        configured.origin !== env.AUDIT_ALLOWED_ORIGIN
+        configured.origin !== configuredOrigin
       )
         throw new Error();
       allowedOrigin = configured.origin;
     } catch {
+      logOriginMismatch();
       return failure(503, "UNAVAILABLE");
     }
     if (
       request.headers.get("origin") !== allowedOrigin ||
       (request.headers.has("sec-fetch-site") &&
         request.headers.get("sec-fetch-site") !== "same-origin")
-    )
+    ) {
+      logOriginMismatch();
       return failure(
         403,
         "ORIGIN_NOT_ALLOWED",
         "Open the Audit page on this website to request analysis.",
       );
+    }
     if (
       request.headers
         .get("content-type")
