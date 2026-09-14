@@ -1,6 +1,6 @@
 # Audit backend operations
 
-Current status: **M3 implemented locally; offline validation complete; live/Preview validation PENDING**. Existing M2.2 Production activation remains complete. M3 is not deployed or enabled. The M3 section below supersedes the earlier one-shot architecture; earlier milestone sections preserve historical evidence.
+Current status: **M3 Preview validation COMPLETE (owner live evidence); M3 Production activation PENDING**. Temporary origin diagnostics removed; M4 not started.
 
 ## M3 Dynamic Diagnostic Interview
 
@@ -373,3 +373,20 @@ Production activation: **COMPLETE**. Production smoke test: **PASS**, based on o
 M3 can be the next milestone, but has not started and requires a separate instruction. No application, prompt, schema, environment, or WAF changes were made for this documentation closure. Historical unchecked items without supplied evidence (such as a separate contact regression result or the exact Preview hostname) are not fabricated as passed.
 
 Closure validation: all 20 offline tests PASS; production build PASS with existing dependency warnings; routing validation PASS; git diff --check PASS; repository/generated-asset secret-pattern scan PASS. .env.local is ignored and untracked, verified using Git metadata only. Closure commit message: `chore: close Astra production activation`; branch main.
+
+
+## M3 Preview closure (2026-09-14)
+
+M3 Preview validation: **COMPLETE / PASS**, based on owner-reported live evidence. This supersedes earlier pending Preview snapshots. M3 Production activation: **PENDING**, not authorized by this closure. M4 remains unstarted.
+
+Stable Preview origin: `https://bimcode-solutions-git-preview-m3-interview-bimc-ode-solutions.vercel.app`. The same-origin text/plain probe returned415, proving the origin check passed and content-type validation was reached. Previous ORIGIN_NOT_ALLOWED is resolved; the evidence does not establish whether the original deployment mismatch was whitespace or another configuration issue. Temporary origin-value/length/equality logging is removed. Configured AUDIT_ALLOWED_ORIGIN is trimmed; exact origin equality, missing-Origin rejection and existing Sec-Fetch-Site protection remain unchanged.
+
+**Ambiguous workflow PASS:** "A team manually checks Revit piping models for disconnected elements and tagging problems." Synthetic context: Revit2025, Mechanical, weekly, one occurrence, one hour/person, two participants, host model only, approved equipment endpoints may intentionally remain open, ISSUE-MEP tagging views, report-only/no automated edits. Interview returned200 and asked three material non-repeated questions: connector defects/intentional exceptions; tagging defect definition; host versus linked models. Answers were accepted across turns. Final analyze returned200 and rendered successfully. The four-question limit was respected; deterministic Revit API/rules-first architecture and unresolved implementation unknowns were retained.
+
+**Detailed workflow PASS:** Revit2025 host-model piping in ISSUE-MEP; approved QA_EndCondition instance values Equipment/FuturePhase exempt intentional open endpoints; visible pipes require tags; linked models excluded; read-only element-ID report; BIM lead review/no automated edits; about5,000 pipes; worksharing; interactive pyRevit in valid API context. These supplied constraints led to **zero clarification questions** and a successfully rendered final assessment, as intended. Full test input remains in the manual procedure in docs/AUDIT_BACKEND.md.
+
+No live latency or token measurements were supplied for these runs; none are invented. Redis-backed multi-turn state worked in the reported workflow. A separate live19th-request rejection/600-second reset result was not supplied and is not claimed. Existing protections remain: analyze Vercel WAF3/600/IP, interview Redis18/600/IP with fail-closed behavior. No secret values were inspected, copied or logged during closure.
+
+Production steps still pending: obtain a separate release/activation authorization; verify the intended release includes this cleaned Preview commit; provision/verify an isolated Production Redis REST store; privately configure its AUDIT_STATE_REDIS_REST_URL/TOKEN and exact canonical AUDIT_ALLOWED_ORIGIN=https://www.bimcodesolutions.com; retain the existing server key/model and analyze enablement, and leave AUDIT_INTERVIEW_ENABLED disabled until the coordinated M3 release. Verify existing analyze WAF3/600/IP remains unchanged and the Redis limiter's deployed rejection/reset behavior. Then, only under Production authorization, merge/release to main, enable the interview in Production and redeploy together; perform a no-model origin/limiter probe and explicitly authorized synthetic smoke test, record safe usage/quality and confirm secret isolation. Until then do not deploy the M3 frontend to Production, change its environment, or alter the existing Production one-shot analyze behavior.
+
+Closure checks: all 59 offline tests PASS; production build PASS (existing browser-data/Zod warnings); routing validation PASS; git diff --check PASS; secret-pattern scan PASS. .env.local remains ignored/untracked, verified without reading values. Runtime review found no temporary origin diagnostics, hard-coded Preview hostname, credentials or test fixtures. Exact closure files: server/audit/handler.js, server/audit/origin.test.js, PROJECT_STATE.md and docs/AUDIT_BACKEND.md. Closure is committed/pushed only to preview/m3-interview; no main merge or Production activation is performed.

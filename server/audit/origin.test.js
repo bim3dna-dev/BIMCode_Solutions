@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createAuditHandler } from "./handler.js";
 
-const origin = "https://bimcode-solutions-git-preview-m3-interview-bimc-ode-solutions.vercel.app";
+const origin = "https://preview-solutions.example";
 function harness(operation, configured = origin) {
   const logs = [];
   const handler = createAuditHandler({
@@ -35,17 +35,15 @@ for (const operation of ["interview", "analyze"]) {
       const reply = await h.post(value, "same-origin", { host: new URL(origin).host, referer: origin + "/audit" });
       assert.equal(reply.status, 403);
       assert.equal((await reply.json()).error.code, "ORIGIN_NOT_ALLOWED");
-      assert.equal(h.logs[0].trimmedEquality, false);
+      assert.deepEqual(h.logs, []);
     }
   });
   test(`${operation}: fetch metadata still rejects non-same-origin even when origin matches`, async () => {
     const h = harness(operation);
     assert.equal((await h.post(origin, "cross-site")).status, 403);
-    assert.equal(h.logs[0].strictEquality, true);
-    assert.equal(h.logs[0].trimmedEquality, true);
+    assert.deepEqual(h.logs, []);
     assert.equal((await h.post(origin, null)).status, 400);
-    assert.deepEqual(Object.keys(h.logs[0]).sort(), ["event", "requestOrigin", "configuredOrigin", "requestOriginLength", "configuredOriginLength", "strictEquality", "trimmedEquality"].sort());
-    assert.ok(!JSON.stringify(h.logs).includes("unit-test-placeholder"));
+    assert.deepEqual(h.logs, []);
   });
   test(`${operation}: trim does not accept paths, wildcards or embedded whitespace`, async () => {
     for (const configured of [origin + "/", "https://*.vercel.app", origin.replace("solutions", "solu tions"), " \n "]) {
