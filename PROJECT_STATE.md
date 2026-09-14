@@ -1,6 +1,6 @@
 # BIMCode Solutions — Project State
 
-Current status: **M3 Preview validation COMPLETE (owner live evidence); M3 Production activation PENDING**. Temporary origin diagnostics removed; M4 not started.
+Current status: **M3 validated Preview integrated into main; Production activation readiness prepared; manual environment/redeploy/smoke validation PENDING**. M4 not started.
 
 ## Metadata
 
@@ -517,3 +517,35 @@ No live latency or token measurements were supplied for these runs; none are inv
 Production steps still pending: obtain a separate release/activation authorization; verify the intended release includes this cleaned Preview commit; provision/verify an isolated Production Redis REST store; privately configure its AUDIT_STATE_REDIS_REST_URL/TOKEN and exact canonical AUDIT_ALLOWED_ORIGIN=https://www.bimcodesolutions.com; retain the existing server key/model and analyze enablement, and leave AUDIT_INTERVIEW_ENABLED disabled until the coordinated M3 release. Verify existing analyze WAF3/600/IP remains unchanged and the Redis limiter's deployed rejection/reset behavior. Then, only under Production authorization, merge/release to main, enable the interview in Production and redeploy together; perform a no-model origin/limiter probe and explicitly authorized synthetic smoke test, record safe usage/quality and confirm secret isolation. Until then do not deploy the M3 frontend to Production, change its environment, or alter the existing Production one-shot analyze behavior.
 
 Closure checks: all 59 offline tests PASS; production build PASS (existing browser-data/Zod warnings); routing validation PASS; git diff --check PASS; secret-pattern scan PASS. .env.local remains ignored/untracked, verified without reading values. Runtime review found no temporary origin diagnostics, hard-coded Preview hostname, credentials or test fixtures. Exact closure files: server/audit/handler.js, server/audit/origin.test.js, PROJECT_STATE.md and docs/AUDIT_BACKEND.md. Closure is committed/pushed only to preview/m3-interview; no main merge or Production activation is performed.
+
+
+## M3 Production activation readiness (2026-09-14)
+
+Repository integration: validated Preview commit `fddf5c9b13b64362d89e500a826af07c0d242b8f` fast-forwarded into main from `2725693`. No history rewrite, conflict, business/UI change or M4 work. The owner has authorized this integration and main push. This supersedes the earlier Preview-only release restriction. **Production environment configuration, redeployment and live smoke validation remain PENDING.** A Git-triggered deployment is not evidence of activation; the M3 UI needs its configured backend and can be unavailable until manual setup/redeployment completes. No Vercel environment or WAF settings were changed by Codex.
+
+Use a **separate Production Upstash-compatible Redis REST database**, not the Preview database. This isolates transient workflow data and per-IP counters (both environments use the same key namespace). No new dependency is needed. Privately create or verify these variables with scope **Production only**:
+
+| Variable | Required Production value |
+| --- | --- |
+| AUDIT_STATE_REDIS_REST_URL | Separate Production database HTTPS REST root URL |
+| AUDIT_STATE_REDIS_REST_TOKEN | Its read/write REST token, not a read-only token |
+| AUDIT_ALLOWED_ORIGIN | https://www.bimcodesolutions.com |
+| OPENAI_API_KEY | Authorized server-side OpenAI project key |
+| OPENAI_MODEL | gpt-6-astra |
+| AUDIT_ANALYSIS_ENABLED | true |
+| AUDIT_INTERVIEW_ENABLED | true |
+
+Do not prefix server variables with VITE_. Integration-injected Redis variables are not automatically read: map credentials privately to the exact AUDIT_STATE_REDIS_REST_* names. Do not copy Preview origin settings. VERCEL=1 is platform-provided, not a manual bypass setting. Never report secret values. Keep Preview settings separate.
+
+Manual redeploy sequence: open the linked Vercel project; Settings -> Environment Variables; create/update all seven Production-scoped variables and save. Verify the existing analyze WAF remains exact POST /api/audit/analyze, Fixed Window, 3 requests/600 seconds/IP, action429. Do not modify/remove it or add a second rule. In Deployments select the main deployment containing the final readiness commit, choose Redeploy, verify the target is Production, and redeploy after variables are saved. Wait for Ready, confirm the deployed Git SHA and the canonical www domain, then use https://www.bimcodesolutions.com/audit. Do not select the Preview deployment by mistake. No local command is necessary after main is pushed. Redis interview protection remains mandatory18/600/IP across instances; origin trimming/exact comparison, missing-Origin and fetch-metadata checks, secret isolation and30-minute state remain intact.
+
+Production verification, after configuration:
+
+1. From the canonical site's DevTools, POST /api/audit/interview with Content-Type:text/plain and any nonsensitive text. Expect415: origin passed without any Redis/OpenAI call.
+2. In a fresh600-second IP window, POST JSON {} to /api/audit/interview nineteen times from that site. Expect400 INVALID_INPUT for1-18,429 RATE_LIMITED for19 and a Retry-After header. No interview state or model call is created; a Vercel Function invocation itself is expected. Wait600 seconds and verify another invalid request returns400. Use a new window before the workflow test. Do not delete keys or disable limits to reset this probe.
+3. **Paid smoke test requires explicit authorization after Production configuration.** Then submit one synthetic intake: title Piping QA; description "A team manually checks Revit piping models for disconnected elements and tagging problems." Mechanical, Revit2025, weekly, one occurrence, one hour/person, two participants; synthetic contact fields only. Review -> Analyze. Expect focused questions (Preview asked three, but exact wording/count is not guaranteed); answer with intentional approved equipment endpoints, ISSUE-MEP tagging views, host model only, report-only/no edits. Verify no duplicates, at most four questions, accepted answers, final POST /api/audit/analyze200 and rendered structured assessment. Preserve deterministic API/rules-first architecture and unresolved unknowns.
+4. Inspect browser requests/responses and built assets for absence of server credentials; do not copy values into reports. Review safe usage logs for model, token counts and timing. Confirm Production Redis holds expiring session state and isolated rate counters; keep workflow content out of diagnostic reports.
+5. Confirm the existing analyze WAF's Production scope and3/600/IP configuration in Firewall. If enforcement verification is needed, in a fresh WAF window send four JSON {} requests to analyze: allowed requests fail input validation400 without model calls, the fourth should be429 at WAF. Confirm firewall counters and absence of a normal function/model invocation for the WAF-blocked request. Do not perform this probe before a smoke test without waiting for reset, since it uses the same WAF allowance.
+6. Record the deployed commit, Production environment, origin probe, Redis rejection/reset, WAF evidence, final200, model usage/latency, quality and secret-isolation result. Mark M3 Production COMPLETE only after actual validation. M4 remains unstarted.
+
+Validation on integrated main: all 59 offline tests PASS; production build PASS with existing browser-data/Zod warnings; routing normalization/API exclusion PASS; git diff --check PASS; secret-pattern scan PASS. .env.local is ignored/untracked; contents were not inspected. Runtime scan found no Preview-only hostname, temporary origin diagnostics or test fixture imports. The readiness commit changes only these two operations documents; merged code is exactly the validated Preview implementation. No paid or other live Production calls were performed by Codex. Remaining blockers are manual Production Redis/variable setup, redeployment, actual limiter/WAF verification and separately authorized paid smoke validation.
