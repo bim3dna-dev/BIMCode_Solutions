@@ -4,7 +4,7 @@ import {
   interviewRequestSchema,
   interviewAssessmentSchema,
 } from "../../shared/audit-interview.js";
-import { createInterviewStore } from "./interview-store.js";
+import { createInterviewStore, interviewClientIp } from "./interview-store.js";
 import { createInterviewService, InterviewError } from "./interview-service.js";
 import {
   createProvider,
@@ -150,6 +150,19 @@ export function createAuditHandler({
       request.headers.get("content-encoding") !== "identity"
     )
       return failure(415, "UNSUPPORTED_ENCODING", "Send uncompressed JSON.");
+    let interviewStore;
+    if (operation === "interview") {
+      if (env.AUDIT_INTERVIEW_ENABLED !== "true") return failure(503, "UNAVAILABLE");
+      try {
+        const ip = interviewClientIp(request, env);
+        interviewStore = storeFactory(env);
+        const limit = await interviewStore.consumeInterviewRequest(ip);
+        if (!limit.allowed)
+          return failure(429, "RATE_LIMITED", "You've reached the analysis limit. Please wait a few minutes and try again.", { "Retry-After": String(limit.retryAfter) });
+      } catch {
+        return failure(503, "UNAVAILABLE");
+      }
+    }
     let input;
     try {
       input = await readJson(request);
@@ -177,7 +190,7 @@ export function createAuditHandler({
     try {
       if (interviewMode) {
         const service = createInterviewService({
-          store: storeFactory(env),
+          store: interviewStore ?? storeFactory(env),
           provider: providerFactory(env.OPENAI_API_KEY),
           model: env.OPENAI_MODEL?.trim() || DEFAULT_MODEL,
           log,

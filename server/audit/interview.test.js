@@ -24,6 +24,7 @@ const response = (data) => ({
   output_parsed: data,
 });
 const env = {
+  VERCEL: "1",
   OPENAI_API_KEY: "unit-test-placeholder",
   AUDIT_ANALYSIS_ENABLED: "true",
   AUDIT_INTERVIEW_ENABLED: "true",
@@ -38,6 +39,7 @@ function harness(
     logs = [];
   // Test-only atomic fake; production never falls back to process-local storage.
   const store = {
+    consumeInterviewRequest: async () => ({ allowed: true, retryAfter: 600 }),
     get: async (id) => structuredClone(states.get(id) ?? null),
     cas: async (id, old, next) => {
       if (JSON.stringify(states.get(id) ?? null) !== JSON.stringify(old))
@@ -71,6 +73,7 @@ function harness(
       new Request(`https://example.com/api/audit/${operation}`, {
         method: "POST",
         headers: {
+          "x-vercel-forwarded-for": "192.0.2.1",
           origin: env.AUDIT_ALLOWED_ORIGIN,
           "content-type": "application/json",
           ...headers,
@@ -464,7 +467,7 @@ test("state outage and lost reservation prevent any provider call", async () => 
     const handler = createAuditHandler({
       env,
       operation: "interview",
-      storeFactory: () => store,
+      storeFactory: () => ({ ...store, consumeInterviewRequest: async () => ({ allowed: true, retryAfter: 600 }) }),
       providerFactory: () => ({
         decideNextAuditQuestion: async () => {
           calls++;
@@ -478,6 +481,7 @@ test("state outage and lost reservation prevent any provider call", async () => 
         method: "POST",
         headers: {
           origin: env.AUDIT_ALLOWED_ORIGIN,
+          "x-vercel-forwarded-for": "192.0.2.1",
           "content-type": "application/json",
         },
         body: JSON.stringify({

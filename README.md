@@ -39,7 +39,7 @@ No environment variables are needed for installation, frontend builds, or offlin
 | `OPENAI_API_KEY` | For analysis | Server-side secret only; never use a `VITE_` prefix or commit a real key. |
 | `OPENAI_MODEL` | No | Server-selected model, default `gpt-6-astra`. Client model overrides are rejected. |
 | `AUDIT_ANALYSIS_ENABLED` | For analysis | Defaults to disabled. Set exactly `true` only after model access and production rate limiting are verified. |
-| `AUDIT_INTERVIEW_ENABLED` | For M3 | Defaults to disabled. Set exactly `true` only in a prepared deployment with shared state and both WAF rules. |
+| `AUDIT_INTERVIEW_ENABLED` | For M3 | Defaults to disabled. Set exactly `true` only in a prepared deployment with shared state, Redis interview limiting and the existing analyze WAF rule. |
 | `AUDIT_STATE_REDIS_REST_URL` | For M3 | HTTPS root URL of an Upstash-compatible Redis REST database supporting GET and atomic EVAL/SET with expiry. |
 | `AUDIT_STATE_REDIS_REST_TOKEN` | For M3 | Server-only read/write token; never expose with a VITE prefix. |
 | `AUDIT_ALLOWED_ORIGIN` | For analysis | One exact browser origin, no trailing slash, e.g. `https://www.bimcodesolutions.com`. Use the actual preview origin for preview testing. |
@@ -80,7 +80,7 @@ The Audit flow is intake -> review -> explicit Analyze Workflow -> zero to four 
 
 M3 requires an externally configured **shared Redis REST store**, using the existing platform `fetch` rather than another SDK. Workflow context, diagnostic answers, and the cached assessment expire after 30 minutes; contact fields are never stored there. See [M3 operations and Preview gates](docs/AUDIT_BACKEND.md#m3-dynamic-diagnostic-interview) for provisioning, WAF limits, failure/retry behavior, and explicit manual live tests. Offline tests use mocked storage and provider transport and need no credentials.
 
-**M3 is not activated or deployed by this change.** Keep `AUDIT_INTERVIEW_ENABLED=false` until Preview has its state store, origin, and differentiated WAF rules. The M3 frontend requires those services; do not deploy it to Production before validation. With the flag off, the existing M2 final API contract remains available, but the new interview route fails closed. With it on, the final endpoint requires a ready server session and rejects legacy direct-intake requests.
+**M3 is not activated or deployed by this change.** Keep `AUDIT_INTERVIEW_ENABLED=false` until Preview has its state store, origin, Redis interview limiting and the existing analyze WAF rule. The M3 frontend requires those services; do not deploy it to Production before validation. With the flag off, the existing M2 final API contract remains available, but the new interview route fails closed. With it on, the final endpoint requires a ready server session and rejects legacy direct-intake requests.
 
 ## Deployment
 

@@ -8,7 +8,7 @@ Current status: **M3 implemented locally; offline validation complete; live/Prev
 
 Intake/review remains local. Analyze starts a diagnostic session; zero questions is valid. Each answer either yields one material BIM-specific question or signals readiness. The browser then requests the existing structured final assessment. There is no generic chat endpoint, conversation transcript, account, financial arithmetic, or M4 implementation.
 
-**Do not deploy this M3 frontend to Production yet.** Its interview route needs shared state and revised external WAF protection. `AUDIT_INTERVIEW_ENABLED` defaults to false and no deployment configuration has been changed here. M2 Production remains as previously activated. When M3 is disabled, the legacy M2 analyze request still works; when enabled, analyze accepts only a ready interview ID, preventing direct-intake bypass of interview state.
+**Do not deploy this M3 frontend to Production yet.** Its interview route needs shared state, the Redis interview limiter and the existing final WAF protection. `AUDIT_INTERVIEW_ENABLED` defaults to false and no deployment configuration has been changed here. M2 Production remains as previously activated. When M3 is disabled, the legacy M2 analyze request still works; when enabled, analyze accepts only a ready interview ID, preventing direct-intake bypass of interview state.
 
 New server-only setup: configure `AUDIT_STATE_REDIS_REST_URL` (HTTPS root endpoint) and `AUDIT_STATE_REDIS_REST_TOKEN` (read/write token) for an Upstash-compatible Redis REST store supporting GET and atomic Lua EVAL/SET/EX. Use separate stores for Preview and Production, with access restricted to the backend. Existing analysis enablement, server key, model and exact-origin checks still apply. No Redis package was added. The adapter uses the documented [REST command-array format](https://upstash.com/docs/redis/features/restapi#post-command-in-body) and [EVAL](https://upstash.com/docs/redis/sdks/ts/commands/scripts/eval). The real service connection, Lua execution and expiry require Preview validation; offline transport tests do not prove provisioning.
 
@@ -55,31 +55,46 @@ No tools/search/background execution or stored Responses retrieval is enabled. A
 
 Safe logs include event (`audit_interview_usage` or `audit_usage`), elapsed milliseconds, model and token counts. No question, answer, identity, request object, session ID, key or provider error details are logged. Browser errors retain the localized 429 limit message even for HTML WAF responses; provider/server failures remain temporarily unavailable. Expiry/failed-session errors offer restart, busy reservations offer manual retry. No firewall details appear in user messages.
 
-### Exact WAF recommendation — external changes still pending
+### Vercel Hobby protection (2026-09-14)
 
-The existing final-analysis rule remains configured at 3 requests / 600 seconds / IP. A maximum interview needs **five interview HTTP requests** (start plus four answers), then **one final request**. A combined three-request cap would prevent completion. Separate the paths; verify no broader lower-limit rule still blocks the interview path.
+This supersedes the earlier two-WAF-rule recommendation. The owner reports one custom rate-limit rule is available. **Do not modify or remove the existing analyze WAF rule. No interview WAF rule is needed.**
 
-| Parameter | New interview rule | Existing final rule |
-| --- | --- | --- |
-| Name | `rate-limit-audit-interview` | `rate-limit-audit-analysis` |
-| Path, exact | `/api/audit/interview` | `/api/audit/analyze` |
-| Method | POST | POST |
-| Strategy | Fixed Window | Fixed Window |
-| Limit | **18 requests** | **3 requests** |
-| Window | 600 seconds | 600 seconds |
-| Counting key | IP Address | IP Address |
-| Action | Too Many Requests (429) | Too Many Requests (429) |
+| Endpoint | Protection | Fixed window | Action |
+| --- | --- | --- | --- |
+| POST `/api/audit/analyze` | Existing Vercel WAF `rate-limit-audit-analysis`, unchanged | 3 requests / 600 seconds / IP | 429 Too Many Requests |
+| POST `/api/audit/interview` | Mandatory server-side Redis limiter | 18 requests / 600 seconds / IP | 429 Too Many Requests |
 
-Rationale: three complete audits allowed by the final rule need 3 × 5 = 15 interview requests; one retry allowance per audit adds three, giving 18. Keep the expensive final allowance unchanged; a final request retry consumes one of its slots even if cached. These limits are per-IP abuse controls, not proof of identity; shared-office IPs share the budget. A malicious caller can spend interview allowance on fresh starts, so approve the overall spend budget and retain provider alerts. No WAF rule has been changed by code or this task. Apply and verify both rules in Preview first, including stable alias access, before enabling the M3 route; repeat deliberately for Production after sign-off.
+The interview limiter uses the existing `AUDIT_STATE_REDIS_REST_URL` and `AUDIT_STATE_REDIS_REST_TOKEN`. No new dependency, variable or database. Atomic Lua EVAL checks/increments the counter and sets expiry on the first accepted request. The fixed window runs 600 seconds from that request, using Redis TTL across Vercel instances. Requests 1-18 pass; request 19 is blocked. Denied requests do not increment or extend the window. Counter keys use a separate `bimcode:audit:m3:rate:interview:` namespace and SHA-256 of the canonical IP. No raw IP is logged or stored in keys; a digest is pseudonymous, not guaranteed anonymous.
+
+**Trusted IP header: `x-vercel-forwarded-for` only**, with platform-provided `VERCEL=1`. See [Vercel request headers](https://vercel.com/docs/headers/request-headers#x-vercel-forwarded-for). The value must be a single valid IPv4/IPv6 address; IPv6 text is canonicalized. Missing/malformed/list/zone-qualified addresses return generic 503. No fallback to `x-forwarded-for`, `x-real-ip`, `Forwarded` or body fields. Trust requires Vercel ingress; do not expose a direct untrusted origin. A proxy in front of Vercel may share its observed IP budget across users. The local `dev:api` adapter lacks this trusted ingress and fails closed for interview calls; do not manually set VERCEL to bypass it. Offline tests inject synthetic platform context.
+
+Limiting runs after method/enablement/origin/content-type checks, but **before body/schema processing, interview-state access or provider construction**. Invalid input and retries also consume slots once they reach the limiter. Blocked requests return safe `RATE_LIMITED`, HTTP 429 and `Retry-After` (remaining seconds, minimum 1), using the existing localized frontend UX. No interview-state read/mutation or OpenAI invocation happens when blocked. Redis configuration/network/timeout/script/malformed-response failures return generic 503 with no bypass or client-visible Redis details.
+
+Maximum audit traffic remains five interview requests plus one final request. Three audits need 15 interview requests; three retry slots give 18. The expensive final WAF stays 3/600/IP. Shared-office IPs share a budget; fixed windows allow bursts near boundaries. Keep Preview and Production stores separate. Actual Redis Lua/expiry and Vercel header enforcement remain Preview validation gates; offline tests mock the REST contracts.
+
+**Exact Preview next action:** deploy/redeploy this patch to Preview with the existing private Redis variables, stable `AUDIT_ALLOWED_ORIGIN`, `OPENAI_MODEL=gpt-6-astra`, and both enable flags true in Preview only. Keep Production unchanged. Retain the existing analyze WAF rule exactly; verify its existing Preview coverage without changing it. No second WAF rule or local test command is required.
+
+**No-model limiter probe:** in a fresh 600-second window, open DevTools on the configured Preview origin and manually execute:
+
+```js
+for (let i = 1; i <= 19; i++) {
+  const response = await fetch('/api/audit/interview', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+  });
+  console.log(i, response.status, response.headers.get('Retry-After'));
+}
+```
+
+Expected: requests 1-18 return 400 (`INVALID_INPUT`), request 19 returns 429, no interview sessions or Astra calls. Previous traffic from that IP reduces the allowance. Wait 600 seconds and verify the next invalid request returns 400 again; do not delete production keys or disable protection. A Redis-blocked request still invokes the Vercel Function, but not Astra. Check provider logs accordingly. After a fresh window, explicitly run the two synthetic workflows below.
 
 ### Manual live/Preview procedure (explicit, billable, not run automatically)
 
 1. Review the uncommitted diff. Create an isolated Preview deployment rather than pushing this frontend to Production. Privately configure a separate state store and server-only credentials. Keep Production unchanged. Test store GET/CAS/expiry with synthetic data; check concurrent reservations and fail-closed behavior.
-2. Configure both WAF rules above for Preview and record the exact stable hostname. Set `AUDIT_ALLOWED_ORIGIN` to its exact HTTPS origin, `OPENAI_MODEL=gpt-6-astra`, and both analysis/interview enable flags to `true` in Preview only. Redeploy that environment. Never put server credentials in VITE variables or reports.
+2. Retain the existing analyze WAF rule unchanged, verify its Preview coverage, and validate the Redis interview limiter above. Record the exact stable hostname. Set `AUDIT_ALLOWED_ORIGIN` to its exact HTTPS origin, `OPENAI_MODEL=gpt-6-astra`, and both analysis/interview enable flags to `true` in Preview only. Redeploy that environment. Never put server credentials in VITE variables or reports.
 3. On `/audit`, enter a synthetic ambiguous workflow: “A team manually checks Revit piping models for disconnected elements and tagging problems.” Use synthetic contact fields and ordinary operational values. Analyze explicitly. Answer using known synthetic constraints, e.g. intentional equipment endpoints, designated issue views and report-only correction authority. Use Skip once if asked about an unknown. Confirm one material question at a time, no repeated topics, no more than four questions, then a valid assessment.
 4. In a second audit, use a detailed synthetic workflow: “In Revit 2025, inspect host-model mechanical piping in the named ISSUE-MEP coordination view only. Flag unconnected pipe connectors except endpoints whose approved QA_EndCondition instance parameter is Equipment or FuturePhase. Flag visible pipes missing tags in that view. Exclude linked models. Use deterministic rules and read-only reporting of element IDs. A BIM lead reviews the report; no automated edits are authorized. The model has about 5,000 pipes, uses worksharing, and the command runs interactively in pyRevit with valid Revit API context.” Confirm the model may proceed without clarification; a question is acceptable only if it materially changes the recommendation. Do not force zero with an undocumented client override.
 5. Record each diagnostic turn's latency and safe input/output/cached/reasoning/total tokens, final latency/tokens, summed token usage and cumulative user wait. Note whether each question materially improved scope, deterministic rules, risk or architecture. Evaluate one-question quality, known/unknown handling, read-only-first design and no financial arithmetic/guarantees/unsupported claims. These measurements remain blank until observed, not copied from M2.
-6. Verify browser → Preview Function → Astra → UI, cached retry/concurrency, restart/intake preservation, all four UI locales, mobile layout and HTML 429 handling. Confirm a blocked WAF request causes no normal model invocation, using firewall/function logs. Avoid unnecessary paid calls just to fill a limit; plan synthetic allowed traffic and review existing counters. Verify secrets are absent from browser assets and responses without copying values into reports.
+6. Verify browser → Preview Function → Astra → UI, cached retry/concurrency, restart/intake preservation, all four UI locales, mobile layout and HTML 429 handling. Confirm WAF-blocked analyze and Redis-blocked interview requests cause no normal model invocation, using firewall/function logs. Avoid unnecessary paid calls just to fill a limit; plan synthetic allowed traffic and review existing counters. Verify secrets are absent from browser assets and responses without copying values into reports.
 7. Record Preview hostname, store validation, WAF evidence, model measurements and qualitative sign-off in PROJECT_STATE. Only then request a separate Production release/activation instruction. M4 remains unstarted.
 
 The existing `npm run test:live` remains the explicit M2 provider smoke test, not an M3 interview test. Normal `npm test` uses only mocks; no real Redis or OpenAI call is made. No M3 live test has been performed by Codex.
